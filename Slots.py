@@ -22,8 +22,8 @@ class PracticeSlot:
         self.startTime = startTime
         self.practices = set()
 
-    def addGame(self, practice):
+    def addPractice(self, practice):
         self.practices.add(practice)
     
-    def removeGame(self, practice):
+    def removePractice(self, practice):
         self.practices.remove(practice)
