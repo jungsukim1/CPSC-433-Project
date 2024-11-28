@@ -1,8 +1,9 @@
 from InputParser import parse_input_file
 from Slots import GameSlot, PracticeSlot
+import random
 
 def create_game_and_practice_slots(game_slots, practice_slots):
-    # Mapping of day abbreviations to duplications
+
     game_duplications = {
         "MO": ["WE", "FR"],
         "TU": ["TH"],
@@ -40,62 +41,106 @@ def create_game_and_practice_slots(game_slots, practice_slots):
     return game_slot_objects, practice_slot_objects
 
 
-if __name__ == "__main__":
-    # Parse the input file
-    (
-        game_slots, practice_slots, games, practices, not_compatible,
-        unwanted, preferences, pair, partial_assignments, wminfilled, 
-        wpref, wpair, wsecdiff, pengamemin, penpracticemin,
-        pennotpaired, pensection
-    ) = parse_input_file()
 
-    # Create GameSlot and PracticeSlot objects
-    game_slot_objects, practice_slot_objects = create_game_and_practice_slots(game_slots, practice_slots)
+# Parse the input file
+(
+    game_slots, practice_slots, games, practices, not_compatible,
+    unwanted, preferences, pair, partial_assignments, wminfilled, 
+    wpref, wpair, wsecdiff, pengamemin, penpracticemin,
+    pennotpaired, pensection
+) = parse_input_file()
 
-    # Print created slots for verification
-    print("Game Slots:")
-    for slot_key, slot in game_slot_objects.items():
-        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+# Create GameSlot and PracticeSlot objects
+game_slot_objects, practice_slot_objects = create_game_and_practice_slots(game_slots, practice_slots)
 
-    print("\nPractice Slots:")
-    for slot_key, slot in practice_slot_objects.items():
-        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+slots_array = []
 
-    print("\nGames:")
-    for game in games:
-        print(f"  {game}")
+# Append all GameSlot objects to the array
+for game_slot in game_slot_objects.values():
+    slots_array.append(game_slot)
 
-    print("\nPractices:")
-    for practice in practices:
-        print(f"  {practice}")
+# Append all PracticeSlot objects to the array
+for practice_slot in practice_slot_objects.values():
+    slots_array.append(practice_slot)
 
-    print("\nNot Compatible:")
-    for pair in not_compatible:
-        print(f"  {pair}")
+for schedule in slots_array:
+    key = f"{schedule.day} {schedule.startTime}"
+    if key in partial_assignments and partial_assignments[key]:
+        if "PRC" in partial_assignments[key][0] or "OPN" in partial_assignments[key][0]:
+            schedule.addPractice(partial_assignments[key][0])
+        else:
+            schedule.addGame(partial_assignments[key][0])
+        del partial_assignments[key]
 
-    print("\nUnwanted:")
-    for key, identifiers in unwanted.items():
-        print(f"  {key} -> {', '.join(identifiers)}")
+fact = [slots_array]
 
-    print("\nPreferences:")
-    for key, value in preferences.items():
-        print(f"  {key} -> {value}")
+# # Print created slots for verification
+# print("Game Slots:")
+# for slot_key, slot in game_slot_objects.items():
+#     print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#     print(slot.games)
 
-    print("\nPair:")
-    for pair_value in pair:
-        print(f"  {pair_value}")
+# print("\nPractice Slots:")
+# for slot_key, slot in practice_slot_objects.items():
+#     print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#     print(slot.practices)
 
-    print("\nPartial Assignments:")
-    for key, identifiers in partial_assignments.items():
-        print(f"  {key} -> {', '.join(identifiers)}")
+# print("\nGames:")
+# for game in games:
+#     print(f"  {game}")
 
-    # Print Weights and Penalty values
-    print("\nWeights and Penalty values:")
-    print(f"wminfilled: {wminfilled}")
-    print(f"wpref: {wpref}")
-    print(f"wpair: {wpair}")
-    print(f"wsecdiff: {wsecdiff}")
-    print(f"pengamemin: {pengamemin}")
-    print(f"penpracticemin: {penpracticemin}")
-    print(f"pennotpaired: {pennotpaired}")
-    print(f"pensection: {pensection}")
+# print("\nPractices:")
+# for practice in practices:
+#     print(f"  {practice}")
+
+# print("\nNot Compatible:")
+# for pair in not_compatible:
+#     print(f"  {pair}")
+
+# print("\nUnwanted:")
+# for key, identifiers in unwanted.items():
+#     print(f"  {key} -> {', '.join(identifiers)}")
+
+# print("\nPreferences:")
+# for key, value in preferences.items():
+#     print(f"  {key} -> {value}")
+
+# print("\nPair:")
+# for pair_value in pair:
+#     print(f"  {pair_value}")
+
+# print("\nPartial Assignments:")
+# for key, identifiers in partial_assignments.items():
+#     print(f"  {key} -> {', '.join(identifiers)}")
+
+# # Print Weights and Penalty values
+# print("\nWeights and Penalty values:")
+# print(f"wminfilled: {wminfilled}")
+# print(f"wpref: {wpref}")
+# print(f"wpair: {wpair}")
+# print(f"wsecdiff: {wsecdiff}")
+# print(f"pengamemin: {pengamemin}")
+# print(f"penpracticemin: {penpracticemin}")
+# print(f"pennotpaired: {pennotpaired}")
+# print(f"pensection: {pensection}")
+
+def OrTree(fact, games, practices):
+    assigned = set()
+    finished = False
+    index = 0
+    if constr(fact):
+        return fact
+    else:
+        while(not constr(fact)):
+            while((not (len(assigned) < len(games) + len(practices))) and 
+                (not finished)):
+                
+                return
+
+def constr(fact):
+    return
+
+def partConstr(assignment, fact):
+    return
+
+OrTree(fact, games, practices)
