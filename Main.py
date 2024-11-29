@@ -72,57 +72,85 @@ for schedule in slots_array:
             schedule.addGame(partial_assignments[key][0])
         del partial_assignments[key]
 
-fact = [slots_array]
+# fact = [slots_array]
 
-# Print created slots for verification
-print("Game Slots:")
-for slot_key, slot in game_slot_objects.items():
-    print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-    print(slot.games)
+# Manually constructed `fact` array
+fact = [[
+    # Game slots with violations
+    GameSlot(4, 1, "MO", "10:00"),  # Max = 2
+    GameSlot(5, 1, "WE", "10:00"),  # Max = 3
+    # Practice slots with violations
+    PracticeSlot(4, 1, "MO", "10:00"),  # Max = 2
+    PracticeSlot(4, 1, "WE", "09:00"),  # Max = 1
+]]
 
-print("\nPractice Slots:")
-for slot_key, slot in practice_slot_objects.items():
-    print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-    print(slot.practices)
+# Adding games/practices to create violations
+fact[0][0].addGame("Team1")
+fact[0][0].addGame("Team2")
+fact[0][0].addGame("Team3")  # Exceeds max for MO 10:00
 
-print("\nGames:")
-for game in games:
-    print(f"  {game}")
+fact[0][1].addGame("Team4")
+fact[0][1].addGame("Team5")
+fact[0][1].addGame("Team6")
+fact[0][1].addGame("Team7")  # Exceeds max for WE 10:00
 
-print("\nPractices:")
-for practice in practices:
-    print(f"  {practice}")
+fact[0][2].addPractice("Team1")
+fact[0][2].addPractice("Team2")
+fact[0][2].addPractice("Team3")  # Exceeds max for MO 09:00
 
-print("\nNot Compatible:")
-for pair in not_compatible:
-    print(f"  {pair}")
+fact[0][3].addPractice("Team4")
+fact[0][3].addPractice("Team5")  # Exceeds max for WE 09:00
 
-print("\nUnwanted:")
-for key, identifiers in unwanted.items():
-    print(f"  {key} -> {', '.join(identifiers)}")
 
-print("\nPreferences:")
-for key, value in preferences.items():
-    print(f"  {key} -> {value}")
+# # Print created slots for verification
+# print("Game Slots:")
+# for slot_key, slot in game_slot_objects.items():
+#     print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#     print(slot.games)
 
-print("\nPair:")
-for pair_value in pair:
-    print(f"  {pair_value}")
+# print("\nPractice Slots:")
+# for slot_key, slot in practice_slot_objects.items():
+#     print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#     print(slot.practices)
 
-print("\nPartial Assignments:")
-for key, identifiers in partial_assignments.items():
-    print(f"  {key} -> {', '.join(identifiers)}")
+# print("\nGames:")
+# for game in games:
+#     print(f"  {game}")
 
-# Print Weights and Penalty values
-print("\nWeights and Penalty values:")
-print(f"wminfilled: {wminfilled}")
-print(f"wpref: {wpref}")
-print(f"wpair: {wpair}")
-print(f"wsecdiff: {wsecdiff}")
-print(f"pengamemin: {pengamemin}")
-print(f"penpracticemin: {penpracticemin}")
-print(f"pennotpaired: {pennotpaired}")
-print(f"pensection: {pensection}")
+# print("\nPractices:")
+# for practice in practices:
+#     print(f"  {practice}")
+
+# print("\nNot Compatible:")
+# for pair in not_compatible:
+#     print(f"  {pair}")
+
+# print("\nUnwanted:")
+# for key, identifiers in unwanted.items():
+#     print(f"  {key} -> {', '.join(identifiers)}")
+
+# print("\nPreferences:")
+# for key, value in preferences.items():
+#     print(f"  {key} -> {value}")
+
+# print("\nPair:")
+# for pair_value in pair:
+#     print(f"  {pair_value}")
+
+# print("\nPartial Assignments:")
+# for key, identifiers in partial_assignments.items():
+#     print(f"  {key} -> {', '.join(identifiers)}")
+
+# # Print Weights and Penalty values
+# print("\nWeights and Penalty values:")
+# print(f"wminfilled: {wminfilled}")
+# print(f"wpref: {wpref}")
+# print(f"wpair: {wpair}")
+# print(f"wsecdiff: {wsecdiff}")
+# print(f"pengamemin: {pengamemin}")
+# print(f"penpracticemin: {penpracticemin}")
+# print(f"pennotpaired: {pennotpaired}")
+# print(f"pensection: {pensection}")
 
 def OrTree(fact, games, practices):
     assigned = set()
@@ -145,12 +173,47 @@ def partConstr(assignment, fact):
     return
 
 def constr(fact):
+    
+    team_dict = {}
     #take schedule(fact), and check if schedule is valid
-    #check gamesmax and practicemax
-    #same team assigned game and practice on same day and time
-    #check not compatible set
+    #check gamesmax and practicemax (DONE)
+    for slot in fact[0]:
+        time_slot = f"{slot.day} {slot.startTime}"
+        if (isinstance(slot, GameSlot)):
+            if (slot.getSize() > slot.max):
+                print("OVER GAME MAX")
+                return False
+            if time_slot not in team_dict:
+                team_dict[time_slot] = {"games": set(), "practices": set()}
+            team_dict[time_slot]["games"].update(slot.games)
+        elif (isinstance(slot, PracticeSlot)):
+            if (slot.getSize() > slot.max):
+                print("OVER PRACTICE MAX")
+                return False
+            if time_slot not in team_dict:
+                team_dict[time_slot] = {"games": set(), "practices": set()}
+            team_dict[time_slot]["practices"].update(slot.practices)
+    for i in team_dict.items():
+        print(i)
+    #same team assigned game and practice on same day and time (DONE)
+    #check not compatible set (DONE)
         #cant have it on same slot
-    #check unwanted set, no games or practice for that team
+    #check unwanted set, no games or practice for that team (DONE)
+    for time_slot, teams in team_dict.items():
+        overlap = teams["games"].intersection(teams["practices"])
+        combined_teams = teams["games"].union(teams["practices"])
+        for sets in not_compatible:
+            if all(teams in combined_teams for teams in sets):
+                print(f"Teams {', '.join(sets)} are scheduled on {time_slot}")
+                return False
+        if  overlap:
+            print("OVERLAP OF GAMES")
+            return False
+        if time_slot in unwanted:
+            overlap = combined_teams.intersection(unwanted[time_slot])
+            if overlap:
+                print(f"UNWANTED CONSTRAINT: {', '.join(overlap)} are in the unwanted list for {time_slot}")
+                return False
     #if a team has a game on monday, they need to have it on wed and fri
     #same for tuesday and thurs
     #practice monday, wed
@@ -161,6 +224,9 @@ def constr(fact):
     #CMSA U12 T1S and CMSA U13 T1S must be scheduled for pracice on tues thurs 6-7
     #CMSA U12 T1S cant be in the same slot with CMSA U12T1
     #CMSA U13 T1S cant be in the same slot with CMSA U13T1
+    print("TEST PASSED")
     return True
 
-OrTree(fact, games, practices)
+constr(fact)
+
+# OrTree(fact, games, practices)
