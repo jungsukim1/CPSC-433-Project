@@ -1,6 +1,7 @@
 from InputParser import parse_input_file
 from Slots import GameSlot, PracticeSlot
 import random
+from collections import defaultdict
 
 def create_game_and_practice_slots(game_slots, practice_slots):
 
@@ -68,8 +69,12 @@ for schedule in slots_array:
     if key in partial_assignments and partial_assignments[key]:
         if "PRC" in partial_assignments[key][0] or "OPN" in partial_assignments[key][0]:
             schedule.addPractice(partial_assignments[key][0])
+            if(partial_assignments[key][0] in practices):
+                practices.remove(partial_assignments[key][0])
         else:
             schedule.addGame(partial_assignments[key][0])
+            if(partial_assignments[key][0] in games):
+                games.remove(partial_assignments[key][0])
         del partial_assignments[key]
 
 fact = [slots_array]
@@ -124,23 +129,153 @@ fact = [slots_array]
 # print(f"pennotpaired: {pennotpaired}")
 # print(f"pensection: {pensection}")
 
+#TODO: Gotta handle the case where there is already a schedule
+#Meaning there is already a game/practice assigned to
 def OrTree(fact, games, practices):
-    assigned = set()
-    finished = False
-    index = 0
+    availableGames = games
+    availablePractice = practices
+
     if constr(fact):
-        return fact
-    else:
-        while(not constr(fact)):
-            while((not (len(assigned) < len(games) + len(practices))) and 
-                (not finished)):
-                
-                return
+        return fact, games, practices
+
+    while not constr(fact):
+        finished = False
+        fullSlots = set()
+        moGamesAdd = defaultdict(list)
+        tuGamesAdd = defaultdict(list)
+        moPracticesAdd = defaultdict(list)
+        tuPracticesAdd = defaultdict(list)
+
+        while (len(availableGames) + len(availablePractice) > 0) and not finished:
+            # Randomly select a slot
+            index = random.randint(0, len(fact) - 1)
+            currentSlot = fact[index]
+
+            # Skip full slots
+            if currentSlot in fullSlots:
+                continue
+
+            # Handle GameSlots
+            if isinstance(currentSlot, GameSlot):
+                if currentSlot.day in {"MO", "TU"}:
+                    if len(currentSlot.games) < currentSlot.max:
+                        alreadyAssigned = set(currentSlot.games)
+
+                        # Remove invalid games
+                        invalidGames = [g for g in currentSlot.games if not partConstr(g, fact, currentSlot)]
+                        for g in invalidGames:
+                            currentSlot.games.remove(g)
+                            availableGames.append(g)
+                            if currentSlot.day == "MO":
+                                moGamesAdd[currentSlot.startTime].remove(g)
+                            else:
+                                tuGamesAdd[currentSlot.startTime].remove(g)
+                            alreadyAssigned.remove(g)
+
+                        # Assign new games
+                        newAvailableGames = [g for g in availableGames if g not in alreadyAssigned]
+                        if newAvailableGames:
+                            gameIndex = random.randint(0, len(newAvailableGames) - 1)
+                            selectedGame = newAvailableGames[gameIndex]
+
+                            if partConstr(selectedGame, fact, currentSlot):
+                                currentSlot.addGame(selectedGame)
+                                if currentSlot.day == "MO":
+                                    moGamesAdd[currentSlot.startTime].append(selectedGame)
+                                else:
+                                    tuGamesAdd[currentSlot.startTime].append(selectedGame)
+                                availableGames.remove(selectedGame)
+
+                    # Mark as full if max reached
+                    if len(currentSlot.games) >= currentSlot.max:
+                        fullSlots.add(currentSlot)
+
+            # Handle PracticeSlots
+            elif isinstance(currentSlot, PracticeSlot):
+                if currentSlot.day in {"MO", "TU", "FR"}:
+                    if len(currentSlot.practices) < currentSlot.max:
+                        alreadyAssigned = set(currentSlot.practices)
+
+                        # Remove invalid practices
+                        invalidPractices = [p for p in currentSlot.practices if not partConstr(p, fact, currentSlot)]
+                        for p in invalidPractices:
+                            currentSlot.practices.remove(p)
+                            availablePractice.append(p)
+                            if currentSlot.day == "MO":
+                                moPracticesAdd[currentSlot.startTime].remove(p)
+                            elif currentSlot.day == "TU":
+                                tuPracticesAdd[currentSlot.startTime].remove(p)
+                            alreadyAssigned.remove(p)
+
+                        # Assign new practices
+                        newAvailablePractice = [p for p in availablePractice if p not in alreadyAssigned]
+                        if newAvailablePractice:
+                            practiceIndex = random.randint(0, len(newAvailablePractice) - 1)
+                            selectedPractice = newAvailablePractice[practiceIndex]
+
+                            if partConstr(selectedPractice, fact, currentSlot):
+                                currentSlot.addPractice(selectedPractice)
+                                if currentSlot.day == "MO":
+                                    moPracticesAdd[currentSlot.startTime].append(selectedPractice)
+                                elif currentSlot.day == "TU":
+                                    tuPracticesAdd[currentSlot.startTime].append(selectedPractice)
+                                availablePractice.remove(selectedPractice)
+
+                    # Mark as full if max reached
+                    if len(currentSlot.practices) >= currentSlot.max:
+                        fullSlots.add(currentSlot)
+
+        # Update slots after processing
+        for slot in fact:
+            if isinstance(slot, GameSlot):
+                if slot.day in {"WE", "FR"}:
+                    for game in moGamesAdd[slot.startTime]:
+                        if game not in slot.games:
+                            slot.games.add(game)
+                elif slot.day == "TH":
+                    for game in tuGamesAdd[slot.startTime]:
+                        if game not in slot.games:
+                            slot.games.add(game)
+
+                if len(slot.games) >= slot.max:
+                    fullSlots.add(slot)
+
+            elif isinstance(slot, PracticeSlot):
+                if slot.day == "WE":
+                    for practice in moPracticesAdd[slot.startTime]:
+                        if practice not in slot.practices:
+                            slot.practices.add(practice)
+                elif slot.day == "TH":
+                    for practice in tuPracticesAdd[slot.startTime]:
+                        if practice not in slot.practices:
+                            slot.practices.add(practice)
+
+                if len(slot.practices) >= slot.max:
+                    fullSlots.add(slot)
+
+        if len(fullSlots) == len(fact):
+            finished = True
+
+    return fact, availableGames, availablePractice
 
 def constr(fact):
-    return
+    randomInt = random.randint(0, 1)
+    if(randomInt == 1):
+        return True
+    return False
 
-def partConstr(assignment, fact):
-    return
+def partConstr(assignment, fact, slot):
+    randomInt = random.randint(0, 4)
+    if(randomInt == 1):
+        return False
+    return True
 
-OrTree(fact, games, practices)
+(newFact, games, practices) = OrTree(fact[0], games, practices)
+
+for slot in newFact:
+    if(isinstance(slot, GameSlot)):
+        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+        print(slot.games)
+    else:
+        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+        print(slot.practices)
