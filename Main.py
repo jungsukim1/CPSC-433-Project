@@ -3,6 +3,7 @@ from Slots import GameSlot, PracticeSlot
 import random
 from collections import defaultdict
 import time
+import copy
 
 def create_game_and_practice_slots(game_slots, practice_slots):
 
@@ -148,79 +149,140 @@ def OrTree(fact, games, practices):
         return fact
 
     start_time = time.time()  # Record the start time
-    while True:  # Outer loop to go until a valid schedule is created
+    while True:
         tempFact = fact[:]  # Reset tempFact as a shallow copy of fact
         newFact = []  # Reset newFact as an empty list
         assignedGames = set()  # Reset the set of assigned games
         assignedPractice = set()  # Reset the set of assigned practices
-
-        while tempFact:  # Process all slots in tempFact
+        moGamesAssigned = defaultdict(list)
+        tuGamesAssigned = defaultdict(list)
+        moPracticesAssigned = defaultdict(list)
+        tuPracticesAssigned = defaultdict(list)
+        while len(tempFact) > 0:  # Process all slots in tempFact
             slot = random.choice(tempFact)  # Pick a random slot from tempFact
             if isinstance(slot, GameSlot):  # Handle game slots
-                if (slot.day == "MO") or (slot.day == "TU" and slot.startTime != "11:00"): 
+                if (slot.day == "MO") or (slot.day == "TU" and slot.startTime != "11:00") or (slot.day == "TH" and slot.startTime == "12:30"): 
                     # Remove games that fail partial constraints
-                    for game in list(slot.games):  # Use list to avoid concurrent modification
+                    for game in list(slot.games):
+                        newFact.append(slot)
                         if not partConstr(game, newFact, slot):
                             assignedGames.discard(game)
                             slot.games.discard(game)
+                            if slot.day == "MO":
+                                if game in moGamesAssigned[slot.startTime]:
+                                    moGamesAssigned[slot.startTime].remove(game)
+                            elif slot.day == "TU":
+                                if game in tuGamesAssigned[slot.startTime]:
+                                    tuGamesAssigned[slot.startTime].remove(game)
+                        else:
+                            if slot.day == "MO":
+                                if game not in moGamesAssigned[slot.startTime]:
+                                    moGamesAssigned[slot.startTime].append(game)
+                            elif slot.day == "TU":
+                                if game not in tuGamesAssigned[slot.startTime]:
+                                    tuGamesAssigned[slot.startTime].append(game)
+                        newFact.remove(slot)
+                    
                     
                     # Assign available games to the slot
                     availableGames = [g for g in games if g not in assignedGames]
-                    if availableGames and slot.getSize() < slot.max:
+                    while slot.getSize() < slot.max:
+                        if not availableGames:
+                            break
                         ranGame = random.choice(availableGames)
-                        if partConstr(ranGame, newFact, slot):
-                            slot.addGame(ranGame)
+                        slot.addGame(ranGame)
+                        newFact.append(slot)
+                        if (partConstr(ranGame, newFact, slot)):
                             assignedGames.add(ranGame)
+                            if slot.day == "MO":
+                                if ranGame not in moGamesAssigned[slot.startTime]:
+                                    moGamesAssigned[slot.startTime].append(ranGame)
+                            elif slot.day == "TU":
+                                if ranGame not in tuGamesAssigned[slot.startTime]:
+                                    tuGamesAssigned[slot.startTime].append(ranGame)
+                        else:
+                            slot.games.discard(ranGame)
+                            assignedGames.discard(ranGame)
                         availableGames.remove(ranGame)
+                        newFact.remove(slot)
                     
-                    newFact.append(slot)  # Add the updated slot to newFact
             else:  # Handle practice slots
                 if slot.day in {"MO", "TU", "FR"}:
                     # Remove practices that fail partial constraints
-                    for practice in list(slot.practices):  # Use list to avoid concurrent modification
+                    for practice in list(slot.practices):
+                        newFact.append(slot)
                         if not partConstr(practice, newFact, slot):
                             assignedPractice.discard(practice)
                             slot.practices.discard(practice)
-                    
+                            if slot.day == "MO":
+                                if practice in moPracticesAssigned[slot.startTime]:
+                                    moPracticesAssigned[slot.startTime].remove(practice)
+                            elif slot.day == "TU":
+                                if practice in tuPracticesAssigned[slot.startTime]:
+                                    tuPracticesAssigned[slot.startTime].remove(practice)
+                        else:
+                            if slot.day == "MO":
+                                if practice not in moPracticesAssigned[slot.startTime]:
+                                    moPracticesAssigned[slot.startTime].append(practice)
+                            elif slot.day == "TU":
+                                if practice not in tuPracticesAssigned[slot.startTime]:
+                                    tuPracticesAssigned[slot.startTime].append(practice)
+                        newFact.remove(slot)
+
                     # Assign available practices to the slot
                     availablePractice = [p for p in practices if p not in assignedPractice]
-                    if availablePractice and slot.getSize() < slot.max:
+                    while slot.getSize() < slot.max:
+                        if not availablePractice:
+                            break
                         ranPractice = random.choice(availablePractice)
-                        if partConstr(ranPractice, newFact, slot):
-                            slot.addPractice(ranPractice)
+                        slot.addPractice(ranPractice)
+                        newFact.append(slot)
+                        if (partConstr(ranPractice, newFact, slot)):
                             assignedPractice.add(ranPractice)
+                            if slot.day == "MO":
+                                if ranPractice not in moPracticesAssigned[slot.startTime]:
+                                    moPracticesAssigned[slot.startTime].append(ranPractice)
+                            elif slot.day == "TU":
+                                if ranPractice not in tuPracticesAssigned[slot.startTime]:
+                                    tuPracticesAssigned[slot.startTime].append(ranPractice)
+                        else:
+                            slot.practices.discard(ranPractice)
+                            assignedPractice.discard(ranPractice)
                         availablePractice.remove(ranPractice)
+                        newFact.remove(slot)
                     
-                    newFact.append(slot)  # Add the updated slot to newFact
-
+            newFact.append(slot)  # Add the updated slot to newFact
             tempFact.remove(slot)  # Remove the processed slot from tempFact
 
-            if((len(assignedGames) + len(assignedPractice)) == (len(games) + len(practices))):
+            if (len(assignedGames) + len(assignedPractice)) == (len(games) + len(practices)):
+                print("All games and practices assigned.")
                 break
-
-        # Break if a valid schedule is created
+        
         if constr(newFact):
             break
+    
+    for slot in newFact:
+        if isinstance(slot, GameSlot):
+            if slot.day == "WE" or slot.day == "FR":
+                for game in moGamesAssigned[slot.startTime]:
+                    slot.addGame(game)
+            elif slot.day == "TH":
+                for game in tuGamesAssigned[slot.startTime]:
+                    slot.addGame(game)
+        else:
+            if slot.day == "WE":
+                for practice in moPracticesAssigned[slot.startTime]:
+                    slot.addPractice(practice)
+            elif slot.day == "TH":
+                for practice in tuPracticesAssigned[slot.startTime]:
+                    slot.addPractice(practice)
 
     return newFact
 
 def partConstr(assignment, fact, slot):
 
-    tempFact = fact
-    for time_slot in tempFact:
-        if(isinstance(slot, GameSlot) and
-           isinstance(time_slot, GameSlot)):
-            if(time_slot.day == slot.day and
-               time_slot.startTime == slot.startTime):
-                time_slot.addGame(assignment)
-        elif(isinstance(slot, PracticeSlot) and
-             isinstance(time_slot, PracticeSlot)):
-            if(time_slot.day == slot.day and
-               time_slot.startTime == slot.startTime):
-                time_slot.addPractice(assignment)
-
     team_dict = {}
-    for slot in tempFact:
+    for slot in fact:
         time_slot = f"{slot.day} {slot.startTime}"
         if (isinstance(slot, GameSlot)):
             if time_slot not in team_dict:
@@ -243,6 +305,7 @@ def partConstr(assignment, fact, slot):
     for time_slot, teams in team_dict.items():
         overlap = teams["games"].intersection(teams["practices"])
         combined_teams = teams["games"].union(teams["practices"])
+        # print(f"Time Slot: {time_slot}, Games: {teams['games']}, Practices: {teams['practices']}")
         day, time = time_slot.split(" ")
         hour, minute = time.split(":")
         hour = int(hour)
@@ -256,7 +319,7 @@ def partConstr(assignment, fact, slot):
                 return False
 
         # No games Tuesday 11-12:30 (DONE)
-        if day == "TU" and "11:00" <= time < "12:30":
+        if day == "TU" and "11:00" <= time <= "12:30":
             tuesday_games = teams["games"]
             if tuesday_games:
                 #print(f"Tuesday game not allowed in slot {time_slot}: {', '.join(tuesday_games)}")
@@ -264,8 +327,11 @@ def partConstr(assignment, fact, slot):
 
         # Check not compatible set (DONE)
         for sets in not_compatible:
-            if all(team in combined_teams for team in sets):
-                #print(f"Incompatible teams {', '.join(sets)} scheduled together on {time_slot}")
+            if all(team in teams["games"] for team in sets):
+                print(f"Incompatible teams {', '.join(sets)} scheduled together on {time_slot}")
+                return False
+            if all(team in teams["practices"] for team in sets):
+                print(f"Incompatible teams {', '.join(sets)} scheduled together on {time_slot}")
                 return False
 
         # Same team assigned game and practice on same day and time (DONE)
@@ -310,6 +376,7 @@ def partConstr(assignment, fact, slot):
         #             #print(f"Conflict: CMSA U13 T1S and U13 T1 both scheduled in slot {time_slot}. Teams: {', '.join(u13_matching)}")
         #             return False
     #print("TEST PASSED")
+
     return True
 
 def constr(fact):
@@ -338,6 +405,7 @@ def constr(fact):
     
     if(isEmpty):
         return False
+    
 
     # #Special practice and special games for last hard constraint for city of calgary
     # special_game_bookings = {'CMSA U12T1', 'CMSA U13T1'}
@@ -372,15 +440,11 @@ def constr(fact):
 
         # Check not compatible set (DONE)
         for sets in not_compatible:
-            if all(team in combined_teams for team in sets):
+            if all(team in teams["games"] for team in sets):
                 print(f"Incompatible teams {', '.join(sets)} scheduled together on {time_slot}")
-                # for slot in fact:
-                #     if(isinstance(slot, GameSlot)):
-                #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-                #         print(slot.games)
-                #     else:
-                #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-                #         print(slot.practices)
+                return False
+            if all(team in teams["practices"] for team in sets):
+                print(f"Incompatible teams {', '.join(sets)} scheduled together on {time_slot}")
                 return False
 
         # Same team assigned game and practice on same day and time (DONE)
@@ -430,6 +494,7 @@ def constr(fact):
 
 newFact = OrTree(fact[0], games, practices)
 
+
 for slot in newFact:
     if(isinstance(slot, GameSlot)):
         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
@@ -438,3 +503,10 @@ for slot in newFact:
         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
         print(slot.practices)
 
+fact.append(newFact)
+constr(newFact)
+print(len(fact[0]), len(newFact))
+
+missing_slots = [slot for slot in fact[0] if slot not in newFact]
+if missing_slots:
+    print(f"Missing slots detected: {missing_slots}")
