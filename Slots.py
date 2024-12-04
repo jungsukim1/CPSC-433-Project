@@ -7,6 +7,7 @@ class GameSlot:
         self.startTime = startTime
         self.games = set()
         self.size = 0
+        self.triedGames = set()
 
     def addGame(self, game):
         self.size += 1
@@ -17,7 +18,7 @@ class GameSlot:
         self.games.remove(game)
         
     def getSize(self):
-        return self.size
+        return len(self.games)
     
 class PracticeSlot:
     
@@ -28,6 +29,7 @@ class PracticeSlot:
         self.startTime = startTime
         self.practices = set()
         self.size = 0
+        self.triedPractices = set()
 
     def addPractice(self, practice):
         self.size += 1
@@ -38,4 +40,4 @@ class PracticeSlot:
         self.practices.remove(practice)
     
     def getSize(self):
-        return self.size
+        return len(self.practices)
