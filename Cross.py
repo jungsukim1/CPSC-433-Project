@@ -8,8 +8,8 @@ def Cross(scheduleA,scheduleB):
     temp_games_list = [] 
     temp_practices_list = [] 
     
-    totalobjectsA = scheduleA.totalGames + scheduleA.totalPractices
-    totalobjectsB = scheduleB.totalGames + scheduleB.totalPractices
+    totalobjectsA = scheduleA.getTotalGames() + scheduleA.getTotalPractices()
+    totalobjectsB = scheduleB.getTotalGames() + scheduleB.getTotalPractices()
     
     #the max loop amount is the totalnumber of games+practice of the smaller sched incase they arent the same size
     loop_max = totalobjectsA if totalobjectsA < totalobjectsB else totalobjectsB 
@@ -52,28 +52,36 @@ def Cross(scheduleA,scheduleB):
         
 #finds a random game
 def Get_rand_game(schedule):
-    index = random.randint(0,schedule.totalGames - 1)
-    chosen_gameSlot = schedule.gameslots[index]
-    taken_game = chosen_gameSlot.games.removeGame()
-    
-    #store the game in a temp gameslot object
-    #purpose was to store the gameitself and day/time, you could technically use a dict instead but nah
-    resultSlot = GameSlot(-1,-1,chosen_gameSlot.day,chosen_gameSlot.startTime)
-    resultSlot.addGame(taken_game)
+    while True:
+        index = random.randint(0,schedule.getTotalGames() - 1)
+        chosen_gameSlot = schedule.gameslots[index]
+        if chosen_gameSlot.games:
+            taken_game = chosen_gameSlot.removeGame()
+            
+            #store the game in a temp gameslot object
+            #purpose was to store the gameitself and day/time, you could technically use a dict instead but nah
+            resultSlot = GameSlot(-1,-1,chosen_gameSlot.day,chosen_gameSlot.startTime)
+            resultSlot.addGame(taken_game)
+
+            break
     
     return {"resultSlot" : resultSlot, "indexA" : index} #returns a dict of the slot obj and the index where it was taken from
     
 
 def Get_rand_practice(schedule):
-    index = random.randint(0,schedule.totalPractices - 1)
-    chosen_practiceSlot = schedule.practiceslots[index]
-    taken_practice = chosen_practiceSlot.practices.removeGame()
-    
-    #store the game in a temp gameslot object
-    #purpose was to store the gameitself and day/time, you could technically use a dict instead but nah
-    resultSlot = PracticeSlot(-1,-1,chosen_practiceSlot.day,chosen_practiceSlot.startTime)
-    resultSlot.addGame(taken_practice)
-    
+    while True:
+        index = random.randint(0,schedule.getTotalPractices() - 1)
+        chosen_practiceSlot = schedule.practiceslots[index]
+        if chosen_practiceSlot.practices:
+            taken_practice = chosen_practiceSlot.removePractice()
+            
+            #store the game in a temp gameslot object
+            #purpose was to store the gameitself and day/time, you could technically use a dict instead but nah
+            resultSlot = PracticeSlot(-1,-1,chosen_practiceSlot.day,chosen_practiceSlot.startTime)
+            resultSlot.addPractice(taken_practice)
+            
+            break
+            
     return {"resultSlot" : resultSlot, "indexA" : index} #returns a dict of the slot obj and the index where it was taken from
-        
+
     

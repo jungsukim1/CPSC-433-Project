@@ -25,10 +25,10 @@ class Schedule:
         self.practiceslots.append(practiceslot)
         
     def getTotalGames(self):
-        return self.totalGames
+        return len(self.gameslots)
     
     def getTotalPractices(self):
-        return self.totalPractices
+        return len(self.practiceslots)
     
     def removeGameSlot(self):
         self.totalGames -= 1

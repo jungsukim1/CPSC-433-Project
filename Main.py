@@ -3,6 +3,8 @@ from Slots import GameSlot, PracticeSlot
 from Schedule import Schedule
 import random
 import copy
+from Mutation import Mutation
+from Cross import Cross
 
 
 def create_game_and_practice_slots(game_slots, practice_slots):
@@ -455,25 +457,27 @@ newFact = OrTree(FACTS[0], games, practices)
 #         print(slot.practices)
 
 FACTS.append(newFact)
-secondFact = copy.deepcopy(FACTS[1])
-slot = random.choice(secondFact.gameslots + secondFact.practiceslots)
 
-# print(slot.day, slot.startTime)
-if isinstance(slot, GameSlot):
-    slot.addGame(games[10])
-    print(slot.games)
-else:
-    slot.addPractice(practices[10])
-    print(slot.practices)
+mutatedFact = Mutation(FACTS[1], games, practices)
+# print(constr(mutatedFact))
+# print("Mutated")
+# for slot in mutatedFact.gameslots + mutatedFact.practiceslots:
+#     if(isinstance(slot, GameSlot)):
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.games)
+#     else:
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.practices)
 
-newSecondFact = OrTree(secondFact, games, practices)
+# print("Fixed")
+fixedMutatedFact = OrTree(mutatedFact, games, practices)
+# for slot in fixedMutatedFact.gameslots + fixedMutatedFact.practiceslots:
+#     if(isinstance(slot, GameSlot)):
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.games)
+#     else:
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.practices)
+FACTS.append(fixedMutatedFact)
 
-for slot in newSecondFact.gameslots + newSecondFact.practiceslots:
-    if(isinstance(slot, GameSlot)):
-        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-        print(slot.games)
-    else:
-        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-        print(slot.practices)
-
-print(len(newSecondFact.gameslots) + len(newSecondFact.practiceslots))
+crossFact = Cross(FACTS[1], FACTS[2])
