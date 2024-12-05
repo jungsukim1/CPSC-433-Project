@@ -6,22 +6,23 @@ class Schedule:
         self.totalPractices = 0
         self.gameslots = []
         self.practiceslots = []
+        self.eval = 0
         
     def addGameSlot(self,gameslot):
-        if gameslot is not GameSlot:
-            print("Error wrong data type")
+        if not isinstance(gameslot, GameSlot):
+            print("Error wrong data type Game")
             return
     
         self.totalGames += gameslot.size
         self.gameslots.append(gameslot)
     
     def addPracticeSlot(self,practiceslot):
-        if practiceslot is not PracticeSlot:
-            print("Error wrong data type")
+        if not isinstance(practiceslot, PracticeSlot):
+            print("Error wrong data type Practice")
             return
     
         self.totalPractices += practiceslot.size
-        self.gameslots.append(practiceslot)
+        self.practiceslots.append(practiceslot)
         
     def getTotalGames(self):
         return self.totalGames
@@ -38,16 +39,18 @@ class Schedule:
         return self.practiceslots.pop()
         
     def removeSpecificGameSlot(self,gameSlot):
-        if gameSlot is not GameSlot:
+        if not isinstance(gameSlot, GameSlot):
             print("Error wrong data type")
             return
         
+        # if gameSlot in self.gameslots:
         self.gameslots.remove(gameSlot)
         self.totalGames -= 1
         
     def removeSpecficPracticeSlot(self,practiceSlot):
-        if practiceSlot is not PracticeSlot:
+        if not isinstance(practiceSlot, PracticeSlot):
             print("Error wrong data type")
             return
+        # if practiceSlot in self.practiceslots:
         self.practiceslots.remove(practiceSlot)
         self.totalPractices -= 1
