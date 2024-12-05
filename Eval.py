@@ -19,11 +19,24 @@ from Slots import GameSlot, PracticeSlot
     ) = parse_input_file()
 
 
+keywords = []
+for i in games:
+    splited = i.split()
+    keywords.append(splited[1])
+
+keywords = list(set(keywords))
+
+for i in practices:
+    splited = i.split()
+    keywords.append(splited[1])
+
+keywords = list(set(keywords))
+# print(keywords)
 
 
 def eval_minfilled(fact):
     game_min = game_slots["min"]
-    prac_min = practice_slots['min']
+    prac_min = practice_slots["min"]
 
     # finding how many games assigned in fact
     game_temp = 0
@@ -55,12 +68,12 @@ def eval_pref(fact):
         
     return pref_val
 
-# make sure this actually works the way u think it works
 def eval_pair(fact):
     
     slot_pair = pair
     val = 0
     team_dict = {}
+
     for slot in fact:
         time_slot = f"{slot.day} {slot.startTime}"
         if (isinstance(slot, GameSlot)):
@@ -99,7 +112,6 @@ def eval_secdiff(fact):
             team_dict[time_slot]["practices"].update(slot.practices)
 
     for time_slot, teams in team_dict.items():
-        keywords = {} # find out a way to get all unique age/tier
         keyword_overlap = [team for team in teams["games"] if any(keyword in team for keyword in keywords)]
         if len(keyword_overlap) > 1:
             val += pensection
@@ -112,3 +124,5 @@ def Eval(fact):
     
     return val
     
+
+# print(Eval(fact))
