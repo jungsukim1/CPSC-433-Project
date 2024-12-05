@@ -49,7 +49,7 @@ def Generate_Game(gameSlotsList,games,index,changed_games):
 def Generate_Practice(practiceSlotsList,practices,index,changed_games): 
     rand_game_index = random.randint(0, len(practices) - 1)
     result = practices[rand_game_index]
-    if practices[rand_game_index] in practiceSlotsList[index].practices or games[rand_game_index] in changed_games:
+    if practices[rand_game_index] in practiceSlotsList[index].practices or practices[rand_game_index] in changed_games:
         result = Generate_Game(practiceSlotsList,practices,index)
     
     return result
