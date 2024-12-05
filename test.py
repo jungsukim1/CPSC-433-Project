@@ -4,9 +4,12 @@ class test_class:
         self.test_num = val
 
 a = [1,2,3,4,5]
+x = []
 
-if 3 in a:
-    print("yes")
+x.append(a.pop())
+
+print(x)
+print(a)
 
 
 

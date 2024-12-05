@@ -1,15 +1,18 @@
 from Slots import GameSlot, PracticeSlot
+from Schedule import Schedule
 import random
 
-def Cross(factA,factB):
-    index = random.randint(0,len(factA))
+def Cross(scheduleA,scheduleB):
+    index = random.randint(0,1)
     
-    factB_index = 0
-    if factA[index] is GameSlot:
-        amount_to_cross = random.randint(1,factA.totalGames) #if total games cant be a thing then just make an iterator
-        Get_rand_game(factA[index],amount_to_cross)
-        if factB[factB_index] is not GameSlot:
-            factB_index = 1
+    temp_games_list = [[],[]] #index 0 represents MWF, 1 is TuTh
+    temp_practices_list = [[],[],[]] #index 2 is Fri
+    
+    for i in range (random.randint(1,scheduleA.totalGames + scheduleA.totalPractices)):
+        what_to_change = random.randint(0,1)
+        
+        if what_to_change == 1:
+            gameslot_listA
         
 def Get_rand_game(gameslot,amount):
     games_to_swap = []

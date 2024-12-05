@@ -30,12 +30,12 @@ class Schedule:
         return self.totalPractices
     
     def removeGameSlot(self):
-        self.gameslots.pop()
         self.totalGames -= 1
+        return self.gameslots.pop()
         
     def removePracticeSlot(self):
-        self.practiceslots.pop()
         self.totalPractices -= 1
+        return self.practiceslots.pop()
         
     def removeSpecificGameSlot(self,gameSlot):
         if gameSlot is not GameSlot:
