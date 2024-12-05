@@ -16,7 +16,7 @@ def Mutation(schedule,games,practices):
     changed_games = [] #keeps track of all the changed indexs in the new fact A
     
     #loop for how many games we will change
-    for i in range(random.randint(1,(schedule.totalGames + schedule.totalPractices))):
+    for i in range(random.randint(1,(schedule.totalGames + schedule.totalPractices - 1))):
         loop_range = random.randint(0,1) 
         if loop_range == 1:
             selected_gameslot = schedule.gameslots
