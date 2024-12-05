@@ -1,10 +1,12 @@
 from InputParser import parse_input_file
+from collections import defaultdict
 from Slots import GameSlot, PracticeSlot
 from Schedule import Schedule
 import random
 import copy
 from Mutation import Mutation
 from Cross import Cross
+import time
 
 
 def create_game_and_practice_slots(game_slots, practice_slots):
@@ -99,17 +101,25 @@ FACTS.append(DEFAULTFACT)
 
 
 def OrTree(fact, games, practices):
-    from Slots import GameSlot, PracticeSlot
-    import random
-    from Schedule import Schedule
-    from collections import defaultdict
+    timeout = 3  # Timeout duration in seconds
+    timedOut = False
+
+    # Return the fact if it already satisfies constraints
     if constr(fact):
         return fact
 
+    start_time = time.time()  # Start the timer for this iteration
+
     while True:
+        # Check for timeout
+        if time.time() - start_time > timeout:
+            print("Timeout occurred. Resetting fact to DEFAULTFACT.")
+            fact = DEFAULTFACT  # Reset fact to DEFAULTFACT
+            timedOut = True
+            break
+
         # Create shallow copies of gameslots and practiceslots
         tempFact = fact
-        
         newFact = Schedule()  # Reset newFact as an empty Schedule object
         assignedGames = set()  # Reset the set of assigned games
         assignedPractice = set()  # Reset the set of assigned practices
@@ -131,9 +141,8 @@ def OrTree(fact, games, practices):
                 tempFact.removeSpecficPracticeSlot(slot)
                 if slot not in newFact.practiceslots:
                     newFact.addPracticeSlot(slot)
-            
+
             # Add the slot to newFact to ensure it is not lost
-                
             if isinstance(slot, GameSlot):  # Handle game slots
                 if (slot.day == "MO") or (slot.day == "TU" and slot.startTime != "11:00") or (slot.day == "TH" and slot.startTime == "12:30"):
                     # Remove games that fail partial constraints
@@ -201,8 +210,8 @@ def OrTree(fact, games, practices):
                         availablePractice.remove(ranPractice)
 
         if constr(newFact):
-            break
-    
+            break  # Exit inner loop if constraints are satisfied
+
     for slot in newFact.gameslots + newFact.practiceslots:
         if isinstance(slot, GameSlot):
             if slot.day in {"WE", "FR"}:
@@ -218,6 +227,9 @@ def OrTree(fact, games, practices):
             elif slot.day == "TH":
                 for practice in tuPracticesAssigned[slot.startTime]:
                     slot.addPractice(practice)
+
+    if timedOut:
+        return timedOut
 
     return newFact
 
@@ -457,8 +469,6 @@ newFact = OrTree(FACTS[0], games, practices)
 #         print(slot.practices)
 
 FACTS.append(newFact)
-
-mutatedFact = Mutation(FACTS[1], games, practices)
 # print(constr(mutatedFact))
 # print("Mutated")
 # for slot in mutatedFact.gameslots + mutatedFact.practiceslots:
@@ -468,9 +478,12 @@ mutatedFact = Mutation(FACTS[1], games, practices)
 #     else:
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
 #         print(slot.practices)
+# Timeout and retry logic
 
-# print("Fixed")
+mutatedFact = Mutation(FACTS[1], games, practices)
 fixedMutatedFact = OrTree(mutatedFact, games, practices)
+if fixedMutatedFact == True:
+    fixedMutatedFact = OrTree(DEFAULTFACT, games, practices)
 # for slot in fixedMutatedFact.gameslots + fixedMutatedFact.practiceslots:
 #     if(isinstance(slot, GameSlot)):
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
@@ -478,6 +491,10 @@ fixedMutatedFact = OrTree(mutatedFact, games, practices)
 #     else:
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
 #         print(slot.practices)
+    
+
 FACTS.append(fixedMutatedFact)
 
-crossFact = Cross(FACTS[1], FACTS[2])
+
+
+# crossFact = Cross(FACTS[1], FACTS[2])
