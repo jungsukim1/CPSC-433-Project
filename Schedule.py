@@ -54,3 +54,11 @@ class Schedule:
         # if practiceSlot in self.practiceslots:
         self.practiceslots.remove(practiceSlot)
         self.totalPractices -= 1
+
+    def printSchedule(self):
+        for i in range(0,self.totalGames):
+            print(self.gameslots[i].games, self.gameslots[i].day, self.gameslots[i].startTime)
+            
+        for i in range(0,self.totalPractices):
+            print(self.practiceslots[i].practices, self.practiceslots[i].day, self.practiceslots[i].startTime)
+        

@@ -15,10 +15,14 @@ class GameSlot:
         self.games.add(game)
     
     def removeGame(self): #the purpose of the random popping is to make sure the game removed is random
+        if self.size == 1:
+            return self.games.pop()
+        
         for x in range(random.randint(1,self.size)):
             temp = self.games.pop()
             self.games.add(temp)
         self.size -= 1
+        return self.games.pop()
         
     def getSize(self):
         return len(self.games)
@@ -39,10 +43,16 @@ class PracticeSlot:
         self.practices.add(practice)
     
     def removePractice(self):
+        print(self.size)
+        if self.size == 1:
+            self.size -= 1
+            return self.practices.pop()
+        
         for x in range(random.randint(1,self.size)):
-            temp = self.games.pop()
+            temp = self.practices.pop()
             self.practices.add(temp)
         self.size -= 1
+        return self.practices.pop()
     
     def getSize(self):
         return len(self.practices)
