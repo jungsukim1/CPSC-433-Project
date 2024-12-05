@@ -1,6 +1,7 @@
 from InputParser import parse_input_file
 from Slots import GameSlot, PracticeSlot
 import random
+from Schedule import Schedule
 from collections import defaultdict
 import time
 import copy
@@ -41,13 +42,8 @@ def create_game_and_practice_slots(game_slots, practice_slots):
     # Create and duplicate PracticeSlot objects
     practice_slot_objects = duplicate_slots(practice_slots, PracticeSlot, practice_duplications)
 
-    # Count GameSlots with day "MO" or "TU"
-    game_slot_count = sum(1 for slot in game_slot_objects.values() if slot.day in ["MO", "TU"])
 
-    # Count PracticeSlots with day "MO", "TU", or "FR"
-    practice_slot_count = sum(1 for slot in practice_slot_objects.values() if slot.day in ["MO", "TU", "FR"])
-
-    return game_slot_objects, practice_slot_objects, game_slot_count, practice_slot_count
+    return game_slot_objects, practice_slot_objects
 
 
 
@@ -63,32 +59,29 @@ def create_game_and_practice_slots(game_slots, practice_slots):
 
 
 # Create GameSlot and PracticeSlot objects
-game_slot_objects, practice_slot_objects, game_slot_count, practice_slot_count = create_game_and_practice_slots(game_slots, practice_slots)
+game_slot_objects, practice_slot_objects = create_game_and_practice_slots(game_slots, practice_slots)
 
-print(game_slot_count, practice_slot_count)
 
-slotCount = game_slot_count + practice_slot_count
-
-slots_array = []
+DEFAULTFACT = Schedule()
 
 # Append all GameSlot objects to the array
 for game_slot in game_slot_objects.values():
-    slots_array.append(game_slot)
+    DEFAULTFACT.addGameSlot(game_slot)
 
 # Append all PracticeSlot objects to the array
 for practice_slot in practice_slot_objects.values():
-    slots_array.append(practice_slot)
+    DEFAULTFACT.addPracticeSlot(practice_slot)
 
-for schedule in slots_array:
+for schedule in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
     key = f"{schedule.day} {schedule.startTime}"
     if key in partial_assignments and partial_assignments[key]:
         if "PRC" in partial_assignments[key][0] or "OPN" in partial_assignments[key][0]:
             schedule.addPractice(partial_assignments[key][0])
-            if(partial_assignments[key][0] in practices):
+            if partial_assignments[key][0] in practices:
                 practices.remove(partial_assignments[key][0])
         else:
             schedule.addGame(partial_assignments[key][0])
-            if(partial_assignments[key][0] in games):
+            if partial_assignments[key][0] in games:
                 games.remove(partial_assignments[key][0])
         del partial_assignments[key]
 
@@ -98,9 +91,12 @@ for schedule in slots_array:
             schedule.addPractice('CMSA U12T1S')
         if any('CMSA U13T1' in game for game in games):
             schedule.addPractice('CMSA U13T1S')
-fact = [slots_array]
 
-DEFAULTFACT = slots_array
+FACTS = []
+
+FACTS.append(DEFAULTFACT)
+
+print(len(FACTS[0].gameslots) + len(FACTS[0].practiceslots))
 
 # # Print created slots for verification
 # print("Game Slots:")
@@ -158,10 +154,11 @@ def OrTree(fact, games, practices):
     if constr(fact):
         return fact
 
-    start_time = time.time()  # Record the start time
     while True:
-        tempFact = fact[:]  # Reset tempFact as a shallow copy of fact
-        newFact = []  # Reset newFact as an empty list
+        # Create shallow copies of gameslots and practiceslots
+        tempFact = fact
+        
+        newFact = Schedule()  # Reset newFact as an empty Schedule object
         assignedGames = set()  # Reset the set of assigned games
         assignedPractice = set()  # Reset the set of assigned practices
         moGamesAssigned = defaultdict(list)
@@ -169,14 +166,22 @@ def OrTree(fact, games, practices):
         moPracticesAssigned = defaultdict(list)
         tuPracticesAssigned = defaultdict(list)
 
-        while len(tempFact) > 0:  # Process all slots in tempFact
-            slot = random.choice(tempFact)  # Pick a random slot from tempFact
-            tempFact.remove(slot)  # Immediately remove the slot from tempFact
+        while tempFact.gameslots or tempFact.practiceslots:  # Process all slots in tempFact
+            # Combine both gameslots and practiceslots into one list
+            combined_slots = tempFact.gameslots + tempFact.practiceslots
+            slot = random.choice(combined_slots)  # Select a random slot
+            
+            if isinstance(slot, GameSlot):  # Check if it's a game slot
+                tempFact.removeSpecificGameSlot(slot)
+                if slot not in newFact.gameslots:
+                    newFact.addGameSlot(slot)
+            else:  # It's a practice slot
+                tempFact.removeSpecficPracticeSlot(slot)
+                if slot not in newFact.practiceslots:
+                    newFact.addPracticeSlot(slot)
             
             # Add the slot to newFact to ensure it is not lost
-            if slot not in newFact:
-                newFact.append(slot)
-            
+                
             if isinstance(slot, GameSlot):  # Handle game slots
                 if (slot.day == "MO") or (slot.day == "TU" and slot.startTime != "11:00") or (slot.day == "TH" and slot.startTime == "12:30"):
                     # Remove games that fail partial constraints
@@ -250,7 +255,7 @@ def OrTree(fact, games, practices):
         if constr(newFact):
             break
     
-    for slot in newFact:
+    for slot in newFact.gameslots + newFact.practiceslots:
         if isinstance(slot, GameSlot):
             if slot.day in {"WE", "FR"}:
                 for game in moGamesAssigned[slot.startTime]:
@@ -279,7 +284,7 @@ def partConstr(assignment, fact, slot):
 
 
     team_dict = {}
-    for slot in fact:
+    for slot in fact.gameslots + fact.practiceslots:
         time_slot = f"{slot.day} {slot.startTime}"
         if (isinstance(slot, GameSlot)):
             if time_slot not in team_dict:
@@ -384,7 +389,7 @@ def constr(fact):
         return False
 
     #check gamesmax and practicemax (DONE)
-    for slot in fact:
+    for slot in fact.gameslots + fact.practiceslots:
         time_slot = f"{slot.day} {slot.startTime}"
         if (isinstance(slot, GameSlot)):
             if (slot.getSize() > slot.max):
@@ -492,7 +497,7 @@ def constr(fact):
     return True
 
 
-newFact = OrTree(fact[0], games, practices)
+newFact = OrTree(FACTS[0], games, practices)
 
 
 # for slot in newFact:
@@ -503,11 +508,11 @@ newFact = OrTree(fact[0], games, practices)
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
 #         print(slot.practices)
 
-fact.append(newFact)
+FACTS.append(newFact)
 constr(newFact)
 
 secondFact = copy.deepcopy(newFact)
-slot = random.choice(secondFact)
+slot = random.choice(secondFact.gameslots + secondFact.practiceslots)
 
 print(slot.day, slot.startTime)
 if isinstance(slot, GameSlot):
@@ -519,7 +524,7 @@ else:
 
 secondFact = OrTree(secondFact, games, practices)
 
-for slot in secondFact:
+for slot in secondFact.gameslots + secondFact.practiceslots:
     if(isinstance(slot, GameSlot)):
         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
         print(slot.games)
