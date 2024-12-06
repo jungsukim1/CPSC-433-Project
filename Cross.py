@@ -3,7 +3,7 @@ from Schedule import Schedule
 import random
 import math
 
-def Cross(scheduleA,scheduleB):
+def Cross(scheduleA,scheduleB,partial_assign):
     
     temp_games_list = [] 
     temp_practices_list = [] 
@@ -21,11 +21,15 @@ def Cross(scheduleA,scheduleB):
     loop_max = totalobjectsA if totalobjectsA < totalobjectsB else totalobjectsB 
     loop_max /= 4
     loop_max = round(loop_max)
+    loop_amount = 0
     
     #print("aiofhhgrogirg" ,str(loop_max),str(totalobjectsA),str(totalobjectsB) )
     #random num of game/prac to cross
     for i in range (random.randint(1,loop_max)):
         
+        if i > loop_amount:
+            loop_amount = i
+            
         if (schedA_gameslots == len(temp_games_list)):
             what_to_change = 0
         elif (schedA_practiceslots == len(temp_practices_list)):
@@ -34,14 +38,14 @@ def Cross(scheduleA,scheduleB):
             what_to_change = random.randint(0,1) #choose prac or game
         
         if what_to_change == 1: 
-            taken_gameSlot = Get_rand_game(scheduleA)
+            taken_gameSlot = Get_rand_game(scheduleA,partial_assign)
             temp_games_list.append(taken_gameSlot)
         
         else:
-            taken_practiceSlot = Get_rand_practice(scheduleA)
+            taken_practiceSlot = Get_rand_practice(scheduleA,partial_assign)
             temp_practices_list.append(taken_practiceSlot)
             
-    for i in range (random.randint(1,loop_max - 1)):
+    for i in range (loop_amount):
         
         if (schedB_gameslots == len(temp_games_listB)):
             what_to_change = 0
@@ -51,10 +55,10 @@ def Cross(scheduleA,scheduleB):
             what_to_change = random.randint(0,1) #choose prac or game
         
         if what_to_change == 1: 
-            taken_gameSlot = Get_rand_game(scheduleB)
+            taken_gameSlot = Get_rand_game(scheduleB,partial_assign)
             temp_games_listB.append(taken_gameSlot)
         else:
-            taken_practiceSlot = Get_rand_practice(scheduleB)
+            taken_practiceSlot = Get_rand_practice(scheduleB,partial_assign)
             temp_practices_listB.append(taken_practiceSlot)
     
     for gameSlotADict in temp_games_list:
@@ -98,7 +102,7 @@ def Cross(scheduleA,scheduleB):
     return (scheduleA,scheduleB) #return tuple of sched A and B
         
 #finds a random game
-def Get_rand_game(schedule):
+def Get_rand_game(schedule,partial_as):
 
     available_indices = list(range(len(schedule.gameslots)))
 
@@ -110,7 +114,7 @@ def Get_rand_game(schedule):
         #print(chosen_gameSlot.games, chosen_gameSlot.getSize(), "index", index)
 
         # Check if the chosen slot is valid (not empty)
-        if chosen_gameSlot.getSize() > 0:
+        if chosen_gameSlot.getSize() > 0 and chosen_gameSlot not in partial_as:
             break  # Found a non-empty slot, exit the loop
 
         # Remove the index from available indices because it's empty
@@ -131,7 +135,7 @@ def Get_rand_game(schedule):
     return {"resultSlot" : resultSlot, "indexA" : index} #returns a dict of the slot obj and the index where it was taken from
     
 
-def Get_rand_practice(schedule):
+def Get_rand_practice(schedule,partial_as):
     
     available_indices = list(range(len(schedule.practiceslots)))
 
@@ -143,7 +147,7 @@ def Get_rand_practice(schedule):
         #print(chosen_practiceSlot.practices, chosen_practiceSlot.getSize(), "index", index)
 
         # Check if the chosen slot is valid (not empty)
-        if chosen_practiceSlot.getSize() > 0:
+        if chosen_practiceSlot.getSize() > 0 and chosen_practiceSlot not in partial_as:
             break  # Found a non-empty slot, exit the loop
 
         # Remove the index from available indices because it's empty
