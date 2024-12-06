@@ -7,7 +7,6 @@ from Eval import Eval
 from Mutation import Mutation
 from Cross import Cross
 from collections import defaultdict
->>>>>>> main
 import re
 
 def create_game_and_practice_slots(game_slots, practice_slots):
