@@ -119,7 +119,7 @@ def Get_rand_game(schedule,partial_as):
         index = random.choice(available_indices)
         chosen_gameSlot = schedule.gameslots[index]
 
-        print(chosen_gameSlot.games, chosen_gameSlot.getSize(), "index", index)
+        # print(chosen_gameSlot.games, chosen_gameSlot.getSize(), "index", index)
 
         # Check if the chosen slot is valid (not empty)
         if chosen_gameSlot.getSize() > 0 and not any(game in partial_as for game in chosen_gameSlot.games):
@@ -128,10 +128,10 @@ def Get_rand_game(schedule,partial_as):
         # Remove the index from available indices because it's empty
         available_indices.remove(index)
         if not available_indices:
-            print("All slots are empty")
+            # print("All slots are empty")
             return None
     
-    print(chosen_gameSlot.games, chosen_gameSlot.getSize())
+    # print(chosen_gameSlot.games, chosen_gameSlot.getSize())
     taken_game = chosen_gameSlot.removeGame()
     
     #print("out (games)")
@@ -162,7 +162,7 @@ def Get_rand_practice(schedule,partial_as):
         available_indices.remove(index)
         
         if not available_indices:
-            print("All slots are empty")
+            # print("All slots are empty")
             return None
         
     # index = random.randint(0,len(schedule.practiceslots)- 1)
