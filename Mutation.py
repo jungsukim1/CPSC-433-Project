@@ -31,11 +31,11 @@ def Mutation(schedule,games,practices,partial_assign):
         if loop_range == 1:
             random_gameslot_index = random.randint(0, len(schedule.gameslots) - 1)
             selected_gameslot = schedule.gameslots[random_gameslot_index]
-            print(selected_gameslot.games)
+            # print(selected_gameslot.games)
             newGame = Generate_Game(schedule,selected_gameslot,availableGames,changed_games,partial_assign)
             if newGame == None:
                 return None
-            print(len(selected_gameslot.games))
+            # print(len(selected_gameslot.games))
             selected_gameslot.addGame(newGame)
             changed_games.append(selected_gameslot.removeGame())
             
@@ -45,12 +45,12 @@ def Mutation(schedule,games,practices,partial_assign):
             newPractice = Generate_Practice(schedule,selected_practiceslot,availablePractices,changed_games,partial_assign)
             if newPractice == None:
                 return None
-            print(len(selected_practiceslot.practices))
+            # print(len(selected_practiceslot.practices))
             selected_practiceslot.addPractice(newPractice)
             changed_practices.append(selected_practiceslot.removePractice())
     
             #ORTREE to check the new fact
-    print("changed games:" , changed_games, "changed practices:", changed_practices)
+    # print("changed games:" , changed_games, "changed practices:", changed_practices)
     return schedule #return modified gameslots and practice slots 
 
 def Generate_Game(schedule,gameSlot,games,changed_games,partial_as): 

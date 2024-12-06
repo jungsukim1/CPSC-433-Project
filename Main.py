@@ -106,25 +106,9 @@ for schedule in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
 
 FACTS = []
 
-# for slot in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
-#     if(isinstance(slot, GameSlot)):
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.games)
-#     else:
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.practices)
-
-
 def OrTree(fact, games, practices):
     if fact == None:
         fact = DEFAULTFACT
-    # for slot in fact.gameslots + fact.practiceslots:
-    #     if(isinstance(slot, GameSlot)):
-    #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-    #         print(slot.games)
-    #     else:
-    #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-    #         print(slot.practices)
 
     if constr(fact):
         return fact
@@ -365,14 +349,14 @@ def constr(fact):
         time_slot = f"{slot.day} {slot.startTime}"
         if (isinstance(slot, GameSlot)):
             if (slot.getSize() > slot.max):
-                print(f"OVER GAME MAX: {slot.day} {slot.startTime}")
+                #print(f"OVER GAME MAX: {slot.day} {slot.startTime}")
                 return False
             if time_slot not in team_dict:
                 team_dict[time_slot] = {"games": set(), "practices": set()}
             team_dict[time_slot]["games"].update(slot.games)
         elif (isinstance(slot, PracticeSlot)):
             if (slot.getSize() > slot.max):
-                print(f"OVER PRACTICE MAX: {slot.day} {slot.startTime}")
+                #print(f"OVER PRACTICE MAX: {slot.day} {slot.startTime}")
                 return False
             if time_slot not in team_dict:
                 team_dict[time_slot] = {"games": set(), "practices": set()}
@@ -444,37 +428,16 @@ def constr(fact):
                     return False
     return True
 
-
-# for slot in newFact.gameslots + newFact.practiceslots:
-#     if(isinstance(slot, GameSlot)):
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.games)
-#     else:
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.practices)
-# FACTS.append(newFact)
-# minScore = 100000
-# # for i in range(0, 100):
-# secondNewFact = Mutation(FACTS[1], games, practices, PARTIAL_ASSIGNMENTS)
-# fixedSecondFact = OrTree(secondNewFact, games, practices)
-#     # score = Eval(secondNewFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-#     # if score < minScore:
-#     #     minScore = score
-#     #     print("New lowest: ", minScore)
-# crossFact1, crossFact2 = Cross(newFact, fixedSecondFact, PARTIAL_ASSIGNMENTS)
-
-# fixedCrossFact1 = OrTree(crossFact1, games, practices)
-# fixedCrossFact2 = OrTree(crossFact2, games, practices)
-
-
 def SetbasedAI():
     FACTS = []
-    numGen = 20
+    numGen = 100
     generated = 0
     firstSchedule = OrTree(DEFAULTFACT, games, practices)
+    firstSchedule.eval = Eval(firstSchedule, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
     FACTS.append(firstSchedule)
     mutFact = Mutation(FACTS[0], games, practices, PARTIAL_ASSIGNMENTS)
     fixedMutFact = OrTree(mutFact, games, practices)
+    fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
     keeps = 5
     FACTS.append(fixedMutFact)
     while generated < numGen:
@@ -483,6 +446,7 @@ def SetbasedAI():
             mutFact = Mutation(FACTS[0], games, practices, PARTIAL_ASSIGNMENTS)
             fixedMutFact = OrTree(mutFact, games, practices)
             fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+            print(fixedMutFact.eval)
             FACTS.append(fixedMutFact)
             generated += 1
         else:
@@ -491,6 +455,7 @@ def SetbasedAI():
             fixedCrossFact2 = OrTree(crossFact2, games, practices)
             fixedCrossFact1.eval = Eval(fixedCrossFact1, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
             fixedCrossFact2.eval = Eval(fixedCrossFact2, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+            print(fixedCrossFact2.eval, fixedCrossFact1.eval)
             FACTS.append(fixedCrossFact1)
             FACTS.append(fixedCrossFact2)
             generated += 2
@@ -512,5 +477,3 @@ for slot in facts[0].gameslots + facts[0].practiceslots:
     else:
         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
         print(slot.practices)
-
-
