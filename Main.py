@@ -261,20 +261,17 @@ def partConstr(fact, slot):
     for time_slot, teams in team_dict.items():
         overlap = teams["games"].intersection(teams["practices"])
         combined_teams = teams["games"].union(teams["practices"])
-        # print(f"Time Slot: {time_slot}, Games: {teams['games']}, Practices: {teams['practices']}")
         day, time = time_slot.split(" ")
 
         # DIV 9 are all evening (DONE)
         if time <= "18:00":
-            div9_exists = [name for name in combined_teams if 'DIV 09' in name]
-            if div9_exists:
+            if  [name for name in combined_teams if 'DIV 9' in name]:
                 #print(f"DIV 09 team(s) {div9_exists} scheduled in inappropriate slot {time_slot}")
                 return False
 
         # No games Tuesday 11-12:30 (DONE)
         if day == "TU" and "11:00" <= time <= "12:30":
-            tuesday_games = teams["games"]
-            if tuesday_games:
+            if teams["games"]:
                 #print(f"Tuesday game not allowed in slot {time_slot}: {', '.join(tuesday_games)}")
                 return False
 
@@ -294,8 +291,7 @@ def partConstr(fact, slot):
 
         # Check unwanted set (DONE)
         if time_slot in unwanted:
-            unwanted_overlap = combined_teams.intersection(unwanted[time_slot])
-            if unwanted_overlap:
+            if combined_teams.intersection(unwanted[time_slot]):
                 #print(f"Unwanted constraint violated: {', '.join(unwanted_overlap)} scheduled at {time_slot}")
                 return False
     
@@ -312,21 +308,17 @@ def partConstr(fact, slot):
                 u13_matching = [team for team in combined_teams if any(keyword.lower() in team.lower() for keyword in u13_pair)]
                 u12_matching = [team for team in combined_teams if any(keyword.lower() in team.lower() for keyword in u12_pair)]
                 special_practices_in_this_slot= [team for team in teams["practices"] if any(keyword in team for keyword in special_practice_bookings)]     
-                if (day == "TU" or day == "TH") and (hour == 18 and minute == 0):
-                    if len(special_practices_in_this_slot) == 0:
+                if (day == "TU" or day == "TH") and (time == "18:00"):
+                    if not special_practices_in_this_slot:
                         #print(f"Missing special practice bookings in required slot {time_slot}. Teams: {', '.join(special_practice_bookings)}")
                         return False
                 else:
-                    if len(special_practices_in_this_slot) > 0:
+                    if special_practices_in_this_slot > 0:
                         #print(f"Special practice incorrectly scheduled in slot {time_slot}. Teams: {', '.join(special_practices_in_this_slot)}")
                         return False
                 #CMSA U12T1S cant be in the same slot with CMSA U12T1 (DONE)
-                if len(u12_matching) > 1:
+                if len(u12_matching) > 1 or len(u13_matching) > 1:
                     #print(f"Conflict: CMSA U12 T1S and U12 T1 both scheduled in slot {time_slot}. Teams: {', '.join(u12_matching)}")
-                    return False
-                #CMSA U13T1S cant be in the same slot with CMSA U13T1 (DONE)
-                if len(u13_matching) > 1:
-                    #print(f"Conflict: CMSA U13 T1S and U13 T1 both scheduled in slot {time_slot}. Teams: {', '.join(u13_matching)}")
                     return False
     #print("TEST PASSED")
 
