@@ -15,6 +15,7 @@ class GameSlot:
     
     def removeGame(self): #the purpose of the random popping is to make sure the game removed is random
         if self.size == 1:
+            self.size -= 1
             return self.games.pop()
         
         for x in range(random.randint(1,self.size)):

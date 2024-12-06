@@ -7,8 +7,10 @@ def Cross(scheduleA,scheduleB):
     temp_games_list = [] 
     temp_practices_list = [] 
     
-    totalobjectsA = scheduleA.totalGames + scheduleA.totalPractices
-    totalobjectsB = scheduleB.totalGames + scheduleB.totalPractices
+    schedA_gameslots = scheduleA.getTotalGames()
+    schedB_practiceslots = scheduleA.getTotalPractices()
+    totalobjectsA = scheduleA.getTotalGames() + scheduleA.getTotalPractices()   
+    totalobjectsB = scheduleB.getTotalGames() + scheduleB.getTotalPractices()
     
     #the max loop amount is the totalnumber of games+practice of the smaller sched incase they arent the same size
     loop_max = totalobjectsA if totalobjectsA < totalobjectsB else totalobjectsB 
@@ -16,10 +18,10 @@ def Cross(scheduleA,scheduleB):
     #random num of game/prac to cross
     for i in range (random.randint(1,loop_max - 1)):
         
-        if (scheduleA.totalGames == len(temp_games_list)):
-            what_to_change = 1
-        elif (scheduleA.totalPractices == len(temp_practices_list)):
+        if (schedA_gameslots == len(temp_games_list)):
             what_to_change = 0
+        elif (schedB_practiceslots == len(temp_practices_list)):
+            what_to_change = 1
         else:
             what_to_change = random.randint(0,1) #choose prac or game
         
@@ -64,7 +66,6 @@ def Get_rand_game(schedule):
         index = random.randint(0,len(schedule.gameslots) - 1)
         chosen_gameSlot = schedule.gameslots[index]
     
-    print(chosen_gameSlot.size)
     taken_game = chosen_gameSlot.removeGame()
     
     #store the game in a temp gameslot object
@@ -83,7 +84,6 @@ def Get_rand_practice(schedule):
         index = random.randint(0,len(schedule.practiceslots) - 1)
         chosen_practiceSlot = schedule.practiceslots[index]
         
-    print(chosen_practiceSlot.size)
     taken_practice = chosen_practiceSlot.removePractice()
     
     #store the game in a temp gameslot object
@@ -116,10 +116,8 @@ prac1.addPractice("CMSA U13T3 DIV 01 PRC 01")
 prac2 = PracticeSlot(1,0,"TU","9:00")
 prac2.addPractice("CMSA U13T3 DIV 02 OPN 02")
 
-sched = Schedule()
+sched = Schedule([],[])
 sched.gameslots = [game1,game2,game3]
-sched.totalGames = 3
-sched.totalPractices = 2
 sched.practiceslots = [prac1,prac2]
 print("schedule A")
 sched.printSchedule()
@@ -147,10 +145,8 @@ prac11.addPractice("CUSA U14T2 DIV 02 PRC 03")
 prac22 = PracticeSlot(1,0,"TU","9:00")
 prac22.addPractice("CMSA U14T3 PRC 01")
 
-sched2 = Schedule()
+sched2 = Schedule([],[])
 sched2.gameslots = [game11,game22,game33]
-sched2.totalGames = 3
-sched2.totalPractices = 2
 sched2.practiceslots = [prac11,prac22]
 print("schedule B")
 sched2.printSchedule()
