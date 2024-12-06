@@ -3,10 +3,7 @@ from Slots import GameSlot, PracticeSlot
 from Schedule import Schedule
 import random
 import copy
-<<<<<<< HEAD
 from Eval import Eval
-
-=======
 from Mutation import Mutation
 from Cross import Cross
 from collections import defaultdict
@@ -461,33 +458,6 @@ secondNewFact = OrTree(FACTS[0], games, practices)
 
 crossFact = Cross(newFact, secondNewFact)
 
-<<<<<<< HEAD
-for slot in newFact.gameslots + newFact.practiceslots:
-    if(isinstance(slot, GameSlot)):
-        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-        print(slot.games)
-    else:
-        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-        print(slot.practices)
-
-FACTS.append(newFact)
-
-print(Eval(FACTS[1]))
-# secondFact = copy.deepcopy(FACTS[1])
-# slot = random.choice(secondFact.gameslots + secondFact.practiceslots)
-
-# # print(slot.day, slot.startTime)
-# if isinstance(slot, GameSlot):
-#     slot.addGame(games[10])
-#     print(slot.games)
-# else:
-#     slot.addPractice(practices[10])
-#     print(slot.practices)
-
-# newSecondFact = OrTree(secondFact, games, practices)
-
-# for slot in newSecondFact.gameslots + newSecondFact.practiceslots:
-=======
 # for slot in newFact:
 #     if(isinstance(slot, GameSlot)):
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
@@ -516,18 +486,12 @@ print(Eval(FACTS[1]))
 # if fixedMutatedFact == True:
 #     fixedMutatedFact = OrTree(DEFAULTFACT, games, practices)
 # for slot in fixedMutatedFact.gameslots + fixedMutatedFact.practiceslots:
->>>>>>> main
 #     if(isinstance(slot, GameSlot)):
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
 #         print(slot.games)
 #     else:
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
 #         print(slot.practices)
-<<<<<<< HEAD
-
-# print(len(newSecondFact.gameslots) + len(newSecondFact.practiceslots))
-=======
     
 
 # FACTS.append(fixedMutatedFact)
->>>>>>> main
