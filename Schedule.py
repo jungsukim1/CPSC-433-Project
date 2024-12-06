@@ -1,19 +1,28 @@
 from Slots import GameSlot, PracticeSlot
 
 class Schedule:
-    def __init__(self):
-        self.totalGames = 0
-        self.totalPractices = 0
-        self.gameslots = []
-        self.practiceslots = []
+    def __init__(self,gameslots,practiceslots):
+        self.gameslots = gameslots
+        self.practiceslots = practiceslots
         self.eval = 0
-        
+    
+    def getTotalGames(self):
+        total = 0
+        for slot in self.gameslots:
+            total += slot.size
+        return total
+    
+    def getTotalPractices(self):
+        total = 0
+        for slot in self.practiceslots:
+            total += slot.size
+        return total
+    
     def addGameSlot(self,gameslot):
         if not isinstance(gameslot, GameSlot):
             print("Error wrong data type Game")
             return
-    
-        self.totalGames += gameslot.size
+
         self.gameslots.append(gameslot)
     
     def addPracticeSlot(self,practiceslot):
@@ -21,21 +30,12 @@ class Schedule:
             print("Error wrong data type Practice")
             return
     
-        self.totalPractices += practiceslot.size
         self.practiceslots.append(practiceslot)
-        
-    def getTotalGames(self):
-        return self.totalGames
-    
-    def getTotalPractices(self):
-        return self.totalPractices
     
     def removeGameSlot(self):
-        self.totalGames -= 1
         return self.gameslots.pop()
         
     def removePracticeSlot(self):
-        self.totalPractices -= 1
         return self.practiceslots.pop()
         
     def removeSpecificGameSlot(self,gameSlot):
@@ -45,7 +45,6 @@ class Schedule:
         
         # if gameSlot in self.gameslots:
         self.gameslots.remove(gameSlot)
-        self.totalGames -= 1
         
     def removeSpecficPracticeSlot(self,practiceSlot):
         if not isinstance(practiceSlot, PracticeSlot):
@@ -53,4 +52,11 @@ class Schedule:
             return
         # if practiceSlot in self.practiceslots:
         self.practiceslots.remove(practiceSlot)
-        self.totalPractices -= 1
+
+    def printSchedule(self):
+        for i in range(0,len(self.gameslots)):
+            print(self.gameslots[i].games, self.gameslots[i].day, self.gameslots[i].startTime)
+            
+        for i in range(0,len(self.practiceslots)):
+            print(self.practiceslots[i].practices, self.practiceslots[i].day, self.practiceslots[i].startTime)
+        
