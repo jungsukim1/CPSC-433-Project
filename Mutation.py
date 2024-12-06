@@ -114,7 +114,7 @@ prac1.addPractice("CMSA U13T3 DIV 01 PRC 01")
 prac2 = PracticeSlot(1,0,"TU","9:00")
 prac2.addPractice("CMSA U13T3 DIV 02 OPN 02")
 
-sched = Schedule()
+sched = Schedule([],[])
 sched.gameslots = [game1,game2,game3]
 sched.totalGames = 3
 sched.totalPractices = 2
