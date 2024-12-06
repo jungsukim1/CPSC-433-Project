@@ -3,21 +3,21 @@ from Slots import GameSlot, PracticeSlot
 from Schedule import Schedule
 import random
 import copy
-
+from Mutation import Mutation
 
 def create_game_and_practice_slots(game_slots, practice_slots):
 
-    game_duplications = {
-        "MO": ["WE", "FR"],
-        "TU": ["TH"],
-    }
-    practice_duplications = {
-        "MO": ["WE"],
-        "TU": ["TH"],
-    }
+    # game_duplications = {
+    #     "MO": ["WE", "FR"],
+    #     "TU": ["TH"],
+    # }
+    # practice_duplications = {
+    #     "MO": ["WE"],
+    #     "TU": ["TH"],
+    # }
 
     # Function to create slots and apply duplications
-    def duplicate_slots(slot_dict, slot_class, duplications):
+    def duplicate_slots(slot_dict, slot_class):
         slot_objects = {}
         for slot_key, slot_data in slot_dict.items():
             day, time = slot_key.split()
@@ -28,18 +28,13 @@ def create_game_and_practice_slots(game_slots, practice_slots):
             slot = slot_class(max_val, min_val, day, time)
             slot_objects[f"{day} {time}"] = slot
 
-            # Create duplicate slots for specified days
-            for new_day in duplications.get(day, []):
-                duplicate_slot = slot_class(max_val, min_val, new_day, time)
-                slot_objects[f"{new_day} {time}"] = duplicate_slot
-
         return slot_objects
 
     # Create and duplicate GameSlot objects
-    game_slot_objects = duplicate_slots(game_slots, GameSlot, game_duplications)
+    game_slot_objects = duplicate_slots(game_slots, GameSlot)
 
     # Create and duplicate PracticeSlot objects
-    practice_slot_objects = duplicate_slots(practice_slots, PracticeSlot, practice_duplications)
+    practice_slot_objects = duplicate_slots(practice_slots, PracticeSlot)
 
 
     return game_slot_objects, practice_slot_objects
@@ -61,7 +56,7 @@ def create_game_and_practice_slots(game_slots, practice_slots):
 game_slot_objects, practice_slot_objects = create_game_and_practice_slots(game_slots, practice_slots)
 
 
-DEFAULTFACT = Schedule()
+DEFAULTFACT = Schedule([], [])
 
 # Append all GameSlot objects to the array
 for game_slot in game_slot_objects.values():
@@ -94,6 +89,13 @@ for schedule in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
 FACTS = []
 
 FACTS.append(DEFAULTFACT)
+# for slot in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
+#     if(isinstance(slot, GameSlot)):
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.games)
+#     else:
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.practices)
 
 
 def OrTree(fact, games, practices):
@@ -106,9 +108,11 @@ def OrTree(fact, games, practices):
 
     while True:
         # Create shallow copies of gameslots and practiceslots
+        if fact == None:
+            fact = DEFAULTFACT
         tempFact = fact
         
-        newFact = Schedule()  # Reset newFact as an empty Schedule object
+        newFact = Schedule([], [])  # Reset newFact as an empty Schedule object
         assignedGames = set()  # Reset the set of assigned games
         assignedPractice = set()  # Reset the set of assigned practices
         moGamesAssigned = defaultdict(list)
@@ -199,24 +203,26 @@ def OrTree(fact, games, practices):
                         availablePractice.remove(ranPractice)
 
         if constr(newFact):
-            break
-    
-    for slot in newFact.gameslots + newFact.practiceslots:
-        if isinstance(slot, GameSlot):
-            if slot.day in {"WE", "FR"}:
-                for game in moGamesAssigned[slot.startTime]:
-                    slot.addGame(game)
-            elif slot.day == "TH":
-                for game in tuGamesAssigned[slot.startTime]:
-                    slot.addGame(game)
-        else:
-            if slot.day == "WE":
-                for practice in moPracticesAssigned[slot.startTime]:
-                    slot.addPractice(practice)
-            elif slot.day == "TH":
-                for practice in tuPracticesAssigned[slot.startTime]:
-                    slot.addPractice(practice)
+            break  # Exit inner loop if constraints are satisfied
 
+    # for slot in newFact.gameslots + newFact.practiceslots:
+    #     if isinstance(slot, GameSlot):
+    #         if slot.day in {"WE", "FR"}:
+    #             for game in moGamesAssigned[slot.startTime]:
+    #                 slot.addGame(game)
+    #         elif slot.day == "TH":
+    #             for game in tuGamesAssigned[slot.startTime]:
+    #                 slot.addGame(game)
+    #     else:
+    #         if slot.day == "WE":
+    #             for practice in moPracticesAssigned[slot.startTime]:
+    #                 slot.addPractice(practice)
+    #         elif slot.day == "TH":
+    #             for practice in tuPracticesAssigned[slot.startTime]:
+    #                 slot.addPractice(practice)
+
+    # if timedOut:
+    #     return timedOut
     return newFact
 
 
@@ -444,6 +450,13 @@ def constr(fact):
     return True
 
 newFact = OrTree(FACTS[0], games, practices)
+# for slot in newFact.gameslots + newFact.practiceslots:
+#     if(isinstance(slot, GameSlot)):
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.games)
+#     else:
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.practices)
 
 
 # for slot in newFact:
@@ -455,25 +468,29 @@ newFact = OrTree(FACTS[0], games, practices)
 #         print(slot.practices)
 
 FACTS.append(newFact)
-secondFact = copy.deepcopy(FACTS[1])
-slot = random.choice(secondFact.gameslots + secondFact.practiceslots)
 
-# print(slot.day, slot.startTime)
-if isinstance(slot, GameSlot):
-    slot.addGame(games[10])
-    print(slot.games)
-else:
-    slot.addPractice(practices[10])
-    print(slot.practices)
+# print(constr(mutatedFact))
+# print("Mutated")
+# for slot in mutatedFact.gameslots + mutatedFact.practiceslots:
+#     if(isinstance(slot, GameSlot)):
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.games)
+#     else:
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.practices)
+# Timeout and retry logic
 
-newSecondFact = OrTree(secondFact, games, practices)
-
-for slot in newSecondFact.gameslots + newSecondFact.practiceslots:
+mutatedFact = Mutation(FACTS[1], games, practices)
+fixedMutatedFact = OrTree(mutatedFact, games, practices)
+if fixedMutatedFact == True:
+    fixedMutatedFact = OrTree(DEFAULTFACT, games, practices)
+for slot in fixedMutatedFact.gameslots + fixedMutatedFact.practiceslots:
     if(isinstance(slot, GameSlot)):
         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
         print(slot.games)
     else:
         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
         print(slot.practices)
+    
 
-print(len(newSecondFact.gameslots) + len(newSecondFact.practiceslots))
+# FACTS.append(fixedMutatedFact)

@@ -10,4 +10,6 @@ def Delete(fact):
     del fact[-1]
     return fact
     
+    del fact[0]
+    return fact
     
