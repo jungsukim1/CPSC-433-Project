@@ -8,7 +8,7 @@ import random
 #games - all possible games
 #practices - all possible practices
 #TODO connect with ORTree and test that it works
-def Mutation(schedule,games,practices):
+def Mutation(schedule,games,practices,partial_assign):
        
     availableGames = games
     availablePractices = practices
@@ -32,7 +32,7 @@ def Mutation(schedule,games,practices):
             random_gameslot_index = random.randint(0, len(schedule.gameslots) - 1)
             selected_gameslot = schedule.gameslots[random_gameslot_index]
             #print(selected_gameslot.games)
-            newGame = Generate_Game(schedule,selected_gameslot,availableGames,changed_games)
+            newGame = Generate_Game(schedule,selected_gameslot,availableGames,changed_games,partial_assign)
             if newGame == None:
                 return None
             changed_games.append(selected_gameslot.removeGame())
@@ -41,7 +41,7 @@ def Mutation(schedule,games,practices):
         elif loop_range == 0:
             random_practiceslot_index = random.randint(0, len(schedule.practiceslots) - 1)
             selected_practiceslot = schedule.practiceslots[random_practiceslot_index]
-            newPractice = Generate_Practice(schedule,selected_practiceslot,availablePractices,changed_games)
+            newPractice = Generate_Practice(schedule,selected_practiceslot,availablePractices,changed_games,partial_assign)
             if newPractice == None:
                 return None
             changed_practices.append(selected_practiceslot.removePractice())
@@ -51,7 +51,7 @@ def Mutation(schedule,games,practices):
     print("changed games:" , changed_games, "changed practices:", changed_practices)
     return schedule #return modified gameslots and practice slots 
 
-def Generate_Game(schedule,gameSlot,games,changed_games): 
+def Generate_Game(schedule,gameSlot,games,changed_games,partial_as): 
     temp_arr = games.copy()
     
     if len(temp_arr) == 0:
@@ -63,7 +63,7 @@ def Generate_Game(schedule,gameSlot,games,changed_games):
         rand_game_index = 0
     
     result = temp_arr[rand_game_index]
-    if result in gameSlot.games or result in changed_games or Schedule_check(schedule,result,"") == False:
+    if result in gameSlot.games or result in changed_games or Schedule_check(schedule,result,"") == False or result in partial_as:
         temp_arr.remove(result)
         result = Generate_Game(schedule,gameSlot,temp_arr,changed_games)
         
@@ -71,7 +71,7 @@ def Generate_Game(schedule,gameSlot,games,changed_games):
     return result
 
 #finds a game that isnt in the slot already
-def Generate_Practice(schedule,practiceSlot,practices,changed_games): 
+def Generate_Practice(schedule,practiceSlot,practices,changed_games,partial_as): 
     temp_arr = practices.copy()
     
     if len(temp_arr) == 0:
@@ -83,7 +83,7 @@ def Generate_Practice(schedule,practiceSlot,practices,changed_games):
         rand_game_index = 0
         
     result = practices[rand_game_index]
-    if result in practiceSlot.practices or result in changed_games or Schedule_check(schedule,"",result) == False:
+    if result in practiceSlot.practices or result in changed_games or Schedule_check(schedule,"",result) == False or result in partial_as:
         temp_arr.remove(result)
         result = Generate_Practice(schedule,practiceSlot,temp_arr,changed_games)
     
