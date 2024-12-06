@@ -62,6 +62,8 @@ game_slot_objects, practice_slot_objects = create_game_and_practice_slots(game_s
 
 DEFAULTFACT = Schedule([], [])
 
+PARTIAL_ASSIGNMENTS = []
+
 # Append all GameSlot objects to the array
 for game_slot in game_slot_objects.values():
     DEFAULTFACT.addGameSlot(game_slot)
@@ -75,6 +77,7 @@ for schedule in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
     if key in partial_assignments and partial_assignments[key]:
         if "PRC" in partial_assignments[key][0] or "OPN" in partial_assignments[key][0]:
             schedule.addPractice(partial_assignments[key][0])
+            
             if partial_assignments[key][0] in practices:
                 practices.remove(partial_assignments[key][0])
         else:
@@ -439,7 +442,13 @@ newFact = OrTree(FACTS[0], games, practices)
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
 #         print(slot.practices)
 FACTS.append(newFact)
-secondNewFact = OrTree(FACTS[0], games, practices)
+minScore = 100000
+for i in range(0, 100):
+    secondNewFact = OrTree(FACTS[0], games, practices)
+    score = Eval(secondNewFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+    if score < minScore:
+        minScore = score
+        print("New lowest: ", minScore)
 # for slot in newFact.gameslots + newFact.practiceslots:
 #     if(isinstance(slot, GameSlot)):
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
@@ -455,7 +464,7 @@ secondNewFact = OrTree(FACTS[0], games, practices)
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
 #         print(slot.practices)
 
-crossFact = Cross(newFact, secondNewFact)
+# crossFact = Cross(newFact, secondNewFact)
 
 # for slot in newFact:
 #     if(isinstance(slot, GameSlot)):

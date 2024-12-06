@@ -1,4 +1,3 @@
-from InputParser import parse_input_file
 from Slots import GameSlot, PracticeSlot
 from collections import Counter
 
@@ -12,16 +11,16 @@ from collections import Counter
 # fact[0].addGame("Booking1")
 # fact[0].addPractice("Booking2")
 
-(
-    game_slots, practice_slots, games, practices, not_compatible,
-    unwanted, preferences, pair, partial_assignments, wminfilled, 
-    wpref, wpair, wsecdiff, pengamemin, penpracticemin,
-    pennotpaired, pensection
-    ) = parse_input_file()
+# (
+#     game_slots, practice_slots, games, practices, not_compatible,
+#     unwanted, preferences, pair, partial_assignments, wminfilled, 
+#     wpref, wpair, wsecdiff, pengamemin, penpracticemin,
+#     pennotpaired, pensection
+#     ) = parse_input_file()
 
 
 
-def eval_minfilled(fact):
+def eval_minfilled(fact, pengamemin, penpracticemin):
     
     game_pen = 0
     
@@ -36,7 +35,7 @@ def eval_minfilled(fact):
     return (game_pen + practice_pen)
 
 
-def eval_pref(fact):
+def eval_pref(fact, preferences):
     pref_val = 0
     
     for slot in fact.gameslots + fact.practiceslots:
@@ -52,16 +51,16 @@ def eval_pref(fact):
                 if preferences[games]:
                     if time_slot != preferences[games][0]:
                         pref_val += preferences[games][1]
-                    else:
-                        print(preferences[games], games)
+                    # else:
+                    #     print(preferences[games], games)
                         
         else:
             for practices in slot.practices:
                 if preferences[practices]:
                     if time_slot != preferences[practices][0]:
                         pref_val += preferences[practices][1]
-                    else:
-                        print(preferences[practices], practices)
+                    # else:
+                    #     print(preferences[practices], practices)
                 # practice_slot = f"{time_slot} {practices}"
                 # pen_val = preferences.get(practice_slot)
                 # if practice_slot in preferences.items():
@@ -70,7 +69,7 @@ def eval_pref(fact):
                 #     pref_val += pen_val
     return pref_val
 
-def eval_pair(fact):
+def eval_pair(fact, pair, pennotpaired):
     
     slot_pair = pair
     val = 0
@@ -96,10 +95,10 @@ def eval_pair(fact):
         if len(pair_matching) < 2:
             val += pennotpaired
         
-    print("Pair Matching", pair_matching)
+    # print("Pair Matching", pair_matching)
     return val
 
-def eval_secdiff(fact):
+def eval_secdiff(fact, pensection):
 
     team_dict = {}
     val = 0
@@ -131,12 +130,13 @@ def eval_secdiff(fact):
         if len(duplicates) > 1:
             val += pensection
             
-    print("Sec Diff", duplicates)
+    # print("Sec Diff", duplicates)
     return val
 
-def Eval(fact):
+def Eval(fact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection):
     
-    val = (eval_minfilled(fact) * wminfilled) + (eval_pref(fact) * wpref) + (eval_pair(fact) * wpair) + (eval_secdiff(fact) * wsecdiff)
+    val = ((eval_minfilled(fact, pengamemin, penpracticemin) * wminfilled) + (eval_pref(fact, preferences) * wpref) + 
+            (eval_pair(fact, pair, pennotpaired) * wpair) + (eval_secdiff(fact, pensection) * wsecdiff))
     
     return val
     
