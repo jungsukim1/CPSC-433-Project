@@ -3,7 +3,7 @@ from Slots import GameSlot, PracticeSlot
 from Schedule import Schedule
 import random
 import copy
-
+from Mutation import Mutation
 
 def create_game_and_practice_slots(game_slots, practice_slots):
 
@@ -89,13 +89,13 @@ for schedule in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
 FACTS = []
 
 FACTS.append(DEFAULTFACT)
-for slot in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
-    if(isinstance(slot, GameSlot)):
-        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-        print(slot.games)
-    else:
-        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-        print(slot.practices)
+# for slot in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
+#     if(isinstance(slot, GameSlot)):
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.games)
+#     else:
+#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+#         print(slot.practices)
 
 
 def OrTree(fact, games, practices):
@@ -467,6 +467,7 @@ newFact = OrTree(FACTS[0], games, practices)
 #         print(slot.practices)
 
 FACTS.append(newFact)
+
 # print(constr(mutatedFact))
 # print("Mutated")
 # for slot in mutatedFact.gameslots + mutatedFact.practiceslots:
@@ -478,17 +479,17 @@ FACTS.append(newFact)
 #         print(slot.practices)
 # Timeout and retry logic
 
-# mutatedFact = Mutation(FACTS[1], games, practices)
-# fixedMutatedFact = OrTree(mutatedFact, games, practices)
-# if fixedMutatedFact == True:
-#     fixedMutatedFact = OrTree(DEFAULTFACT, games, practices)
-# for slot in fixedMutatedFact.gameslots + fixedMutatedFact.practiceslots:
-#     if(isinstance(slot, GameSlot)):
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.games)
-#     else:
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.practices)
+mutatedFact = Mutation(FACTS[1], games, practices)
+fixedMutatedFact = OrTree(mutatedFact, games, practices)
+if fixedMutatedFact == True:
+    fixedMutatedFact = OrTree(DEFAULTFACT, games, practices)
+for slot in fixedMutatedFact.gameslots + fixedMutatedFact.practiceslots:
+    if(isinstance(slot, GameSlot)):
+        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+        print(slot.games)
+    else:
+        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+        print(slot.practices)
     
 
 # FACTS.append(fixedMutatedFact)
