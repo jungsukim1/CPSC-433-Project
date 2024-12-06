@@ -114,9 +114,19 @@ def eval_secdiff(fact):
     for time_slot, teams in team_dict.items():
         overlap_teams = [team.split("DIV")[0].strip() for team in teams["games"]]
         overlap_count = Counter(overlap_teams)
-        duplicate_teams = [team for team, count in overlap_count.items() if count > 1]
-        duplicates = [team for team in teams["games"] if team.split("DIV")[0].strip() in duplicate_teams]
+        # duplicate_teams = [team for team, count in overlap_count.items() if count > 1]
+        # duplicates = [team for team in teams["games"] if team.split("DIV")[0].strip() in duplicate_teams]
         
+        duplicate_teams = []
+        for team, count in overlap_count.items():
+            if count > 1:
+                duplicate_teams.append(team)
+                
+                
+        duplicates = []
+        for team in teams["games"]:
+            if team.split("DIV")[0].strip() in duplicate_teams:
+                duplicates.append(team)
         
         if len(duplicates) > 1:
             val += pensection
