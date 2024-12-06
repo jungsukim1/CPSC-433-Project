@@ -91,10 +91,10 @@ def parse_input_file():
         )
     
     # Command-line arguments for weightings and penalties
-    wminfilled = float(sys.argv[2])
-    wpref = float(sys.argv[3])
-    wpair = float(sys.argv[4])
-    wsecdiff = float(sys.argv[5])
+    wminfilled = int(sys.argv[2])
+    wpref = int(sys.argv[3])
+    wpair = int(sys.argv[4])
+    wsecdiff = int(sys.argv[5])
     pengamemin = int(sys.argv[6])
     penpracticemin = int(sys.argv[7])
     pennotpaired = int(sys.argv[8])

@@ -2,7 +2,6 @@ from Slots import GameSlot, PracticeSlot
 from collections import Counter
 
 def eval_minfilled(fact, pengamemin, penpracticemin):
-    
     game_pen = 0
     
     practice_pen = 0
@@ -14,7 +13,6 @@ def eval_minfilled(fact, pengamemin, penpracticemin):
         else:
             if slot.getSize() < slot.getMin():
                 practice_pen += penpracticemin
-
     return (game_pen + practice_pen)
 
 
@@ -31,6 +29,7 @@ def eval_pref(fact, preferences):
                 #     continue
                 # else:
                 #     pref_val += pen_val
+
                 if preferences[games]:
                     if time_slot != preferences[games][0]:
                         pref_val += preferences[games][1]
@@ -50,6 +49,7 @@ def eval_pref(fact, preferences):
                 #     continue
                 # else:
                 #     pref_val += pen_val
+    print(f"pref {pref_val}")
     return pref_val
 
 def eval_pair(fact, pair, pennotpaired):
@@ -71,14 +71,12 @@ def eval_pair(fact, pair, pennotpaired):
 
     for time_slot, teams in team_dict.items():
         combined_teams = teams["games"].union(teams["practices"])
-        pair_matching = list(slot_pair) if all(team in combined_teams for team in slot_pair) else []
-        
+        partial_pairs = [pair for pair in slot_pair if sum(team in combined_teams for team in pair) == 1]
 
-        
-        if len(pair_matching) < 2:
+        if partial_pairs:
             val += pennotpaired
-        
-    # print("Pair Matching", pair_matching)
+    
+    print(f"pairs {val}")
     return val
 
 def eval_secdiff(fact, pensection):
@@ -114,6 +112,7 @@ def eval_secdiff(fact, pensection):
             val += pensection
             
     # print("Sec Diff", duplicates)
+    print(f"secdiff {val}")
     return val
 
 def Eval(fact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection):
