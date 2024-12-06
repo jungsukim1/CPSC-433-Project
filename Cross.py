@@ -114,7 +114,7 @@ def Get_rand_game(schedule,partial_as):
         #print(chosen_gameSlot.games, chosen_gameSlot.getSize(), "index", index)
 
         # Check if the chosen slot is valid (not empty)
-        if chosen_gameSlot.getSize() > 0 and chosen_gameSlot not in partial_as:
+        if chosen_gameSlot.getSize() > 0 and not any(game in partial_as for game in chosen_gameSlot.games):
             break  # Found a non-empty slot, exit the loop
 
         # Remove the index from available indices because it's empty
@@ -147,7 +147,7 @@ def Get_rand_practice(schedule,partial_as):
         #print(chosen_practiceSlot.practices, chosen_practiceSlot.getSize(), "index", index)
 
         # Check if the chosen slot is valid (not empty)
-        if chosen_practiceSlot.getSize() > 0 and chosen_practiceSlot not in partial_as:
+        if chosen_practiceSlot.getSize() > 0 and not any(practice in partial_as for practice in chosen_practiceSlot.practices):
             break  # Found a non-empty slot, exit the loop
 
         # Remove the index from available indices because it's empty
