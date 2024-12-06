@@ -8,6 +8,7 @@ from Mutation import Mutation
 from Cross import Cross
 from collections import defaultdict
 import re
+from Delete import Delete
 
 def create_game_and_practice_slots(game_slots, practice_slots):
 
@@ -74,27 +75,37 @@ for practice_slot in practice_slot_objects.values():
 
 for schedule in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
     key = f"{schedule.day} {schedule.startTime}"
-    if key in partial_assignments and partial_assignments[key]:
-        if "PRC" in partial_assignments[key][0] or "OPN" in partial_assignments[key][0]:
-            schedule.addPractice(partial_assignments[key][0])
-            
-            if partial_assignments[key][0] in practices:
-                practices.remove(partial_assignments[key][0])
-        else:
-            schedule.addGame(partial_assignments[key][0])
-            if partial_assignments[key][0] in games:
-                games.remove(partial_assignments[key][0])
-        del partial_assignments[key]
+    if isinstance(schedule, PracticeSlot):
+        if key in partial_assignments and partial_assignments[key]:
+            if "PRC" in partial_assignments[key][0] or "OPN" in partial_assignments[key][0]:
+                schedule.addPractice(partial_assignments[key][0])
+                if partial_assignments[key][0] not in PARTIAL_ASSIGNMENTS:
+                    PARTIAL_ASSIGNMENTS.append(partial_assignments[key][0])
+                if partial_assignments[key][0] in practices:
+                    practices.remove(partial_assignments[key][0])
+                del partial_assignments[key]
+    else:
+        if key in partial_assignments and partial_assignments[key]:
+            if "PRC" not in partial_assignments[key][0] or "OPN" not in partial_assignments[key][0]:
+                schedule.addGame(partial_assignments[key][0])
+                if partial_assignments[key][0] not in PARTIAL_ASSIGNMENTS:
+                    PARTIAL_ASSIGNMENTS.append(partial_assignments[key][0])
+                if partial_assignments[key][0] in games:
+                    games.remove(partial_assignments[key][0])
+                del partial_assignments[key]
 
     if (schedule.day == "TU" and schedule.startTime == "18:00" and isinstance(schedule, PracticeSlot)):
         if any('CMSA U12T1' in game for game in games):
+            if 'CMSA U12T1S' not in PARTIAL_ASSIGNMENTS:
+                PARTIAL_ASSIGNMENTS.append('CMSA U12T1S')
             schedule.addPractice('CMSA U12T1S')
         if any('CMSA U13T1' in game for game in games):
+            if 'CMSA U13T1S' not in PARTIAL_ASSIGNMENTS:
+                PARTIAL_ASSIGNMENTS.append('CMSA U13T1S')
             schedule.addPractice('CMSA U13T1S')
 
 FACTS = []
 
-FACTS.append(DEFAULTFACT)
 # for slot in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
 #     if(isinstance(slot, GameSlot)):
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
@@ -433,7 +444,7 @@ def constr(fact):
                     return False
     return True
 
-newFact = OrTree(FACTS[0], games, practices)
+
 # for slot in newFact.gameslots + newFact.practiceslots:
 #     if(isinstance(slot, GameSlot)):
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
@@ -441,66 +452,65 @@ newFact = OrTree(FACTS[0], games, practices)
 #     else:
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
 #         print(slot.practices)
-FACTS.append(newFact)
-minScore = 100000
-for i in range(0, 100):
-    secondNewFact = OrTree(FACTS[0], games, practices)
-    score = Eval(secondNewFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-    if score < minScore:
-        minScore = score
-        print("New lowest: ", minScore)
-# for slot in newFact.gameslots + newFact.practiceslots:
-#     if(isinstance(slot, GameSlot)):
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.games)
-#     else:
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.practices)
-# for slot in secondNewFact.gameslots + secondNewFact.practiceslots:
-#     if(isinstance(slot, GameSlot)):
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.games)
-#     else:
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.practices)
+# FACTS.append(newFact)
+# minScore = 100000
+# # for i in range(0, 100):
+# secondNewFact = Mutation(FACTS[1], games, practices, PARTIAL_ASSIGNMENTS)
+# fixedSecondFact = OrTree(secondNewFact, games, practices)
+#     # score = Eval(secondNewFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+#     # if score < minScore:
+#     #     minScore = score
+#     #     print("New lowest: ", minScore)
+# crossFact1, crossFact2 = Cross(newFact, fixedSecondFact, PARTIAL_ASSIGNMENTS)
 
-crossFact = Cross(newFact, secondNewFact)
-print("done")
-
-# for slot in newFact:
-#     if(isinstance(slot, GameSlot)):
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.games)
-#     else:
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.practices)
+# fixedCrossFact1 = OrTree(crossFact1, games, practices)
+# fixedCrossFact2 = OrTree(crossFact2, games, practices)
 
 
-# print(constr(mutatedFact))
-# print("Mutated")
-# for slot in mutatedFact.gameslots + mutatedFact.practiceslots:
-#     if(isinstance(slot, GameSlot)):
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.games)
-#     else:
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.practices)
-# Timeout and retry logic
+def SetbasedAI():
+    FACTS = []
+    numGen = 20
+    generated = 0
+    firstSchedule = OrTree(DEFAULTFACT, games, practices)
+    FACTS.append(firstSchedule)
+    mutFact = Mutation(FACTS[0], games, practices, PARTIAL_ASSIGNMENTS)
+    fixedMutFact = OrTree(mutFact, games, practices)
+    keeps = 5
+    FACTS.append(fixedMutFact)
+    while generated < numGen:
+        mutOrCross = random.randint(0, 1)
+        if mutOrCross == 0:
+            mutFact = Mutation(FACTS[0], games, practices, PARTIAL_ASSIGNMENTS)
+            fixedMutFact = OrTree(mutFact, games, practices)
+            fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+            FACTS.append(fixedMutFact)
+            generated += 1
+        else:
+            crossFact1, crossFact2 = Cross(FACTS[0], FACTS[1], PARTIAL_ASSIGNMENTS)
+            fixedCrossFact1 = OrTree(crossFact1, games, practices)
+            fixedCrossFact2 = OrTree(crossFact2, games, practices)
+            fixedCrossFact1.eval = Eval(fixedCrossFact1, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+            fixedCrossFact2.eval = Eval(fixedCrossFact2, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+            FACTS.append(fixedCrossFact1)
+            FACTS.append(fixedCrossFact2)
+            generated += 2
+        
+        FACTS = sorted(FACTS, key=lambda x: x.eval)
 
-# mutatedFact = Mutation(FACTS[1], games, practices)
-
-# crossFact = Cross(FACTS[1], secondNewFact)
-
-# fixedMutatedFact = OrTree(mutatedFact, games, practices)
-# if fixedMutatedFact == True:
-#     fixedMutatedFact = OrTree(DEFAULTFACT, games, practices)
-# for slot in fixedMutatedFact.gameslots + fixedMutatedFact.practiceslots:
-#     if(isinstance(slot, GameSlot)):
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.games)
-#     else:
-#         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-#         print(slot.practices)
+        if len(FACTS) > keeps:
+            Delete(FACTS)
     
+    return FACTS
 
-# FACTS.append(fixedMutatedFact)
+facts = SetbasedAI()
+
+print(facts[0].eval)
+for slot in facts[0].gameslots + facts[0].practiceslots:
+    if(isinstance(slot, GameSlot)):
+        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+        print(slot.games)
+    else:
+        print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+        print(slot.practices)
+
+
