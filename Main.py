@@ -456,6 +456,7 @@ secondNewFact = OrTree(FACTS[0], games, practices)
 #         print(slot.practices)
 
 crossFact = Cross(newFact, secondNewFact)
+print("done")
 
 # for slot in newFact:
 #     if(isinstance(slot, GameSlot)):
