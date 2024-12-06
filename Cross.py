@@ -111,7 +111,7 @@ def Get_rand_game(schedule,partial_as):
         index = random.choice(available_indices)
         chosen_gameSlot = schedule.gameslots[index]
 
-        #print(chosen_gameSlot.games, chosen_gameSlot.getSize(), "index", index)
+        print(chosen_gameSlot.games, chosen_gameSlot.getSize(), "index", index)
 
         # Check if the chosen slot is valid (not empty)
         if chosen_gameSlot.getSize() > 0 and chosen_gameSlot not in partial_as:
@@ -123,7 +123,7 @@ def Get_rand_game(schedule,partial_as):
             print("All slots are empty")
             break
     
-    #print(chosen_gameSlot.games, chosen_gameSlot.getSize())
+    print(chosen_gameSlot.games, chosen_gameSlot.getSize())
     taken_game = chosen_gameSlot.removeGame()
     
     #print("out (games)")

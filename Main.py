@@ -441,7 +441,7 @@ def SetbasedAI():
     keeps = 5
     FACTS.append(fixedMutFact)
     while generated < numGen:
-        mutOrCross = random.randint(0, 1)
+        mutOrCross = 1#random.randint(0, 1)
         if mutOrCross == 0:
             mutFact = Mutation(FACTS[0], games, practices, PARTIAL_ASSIGNMENTS)
             fixedMutFact = OrTree(mutFact, games, practices)
