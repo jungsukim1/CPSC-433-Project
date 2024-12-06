@@ -1,25 +1,6 @@
 from Slots import GameSlot, PracticeSlot
 from collections import Counter
 
-# python Main.py input.txt 1 0 1 0 10 10 10 10
-
-# fact=[
-#     GameSlot(4, 1, "Mon","11:00"),
-#     PracticeSlot(4, 1, "Tues","11:00")
-# ]
-
-# fact[0].addGame("Booking1")
-# fact[0].addPractice("Booking2")
-
-# (
-#     game_slots, practice_slots, games, practices, not_compatible,
-#     unwanted, preferences, pair, partial_assignments, wminfilled, 
-#     wpref, wpair, wsecdiff, pengamemin, penpracticemin,
-#     pennotpaired, pensection
-#     ) = parse_input_file()
-
-
-
 def eval_minfilled(fact, pengamemin, penpracticemin):
     
     game_pen = 0
@@ -28,9 +9,11 @@ def eval_minfilled(fact, pengamemin, penpracticemin):
     
     for slot in fact.gameslots + fact.practiceslots:
         if isinstance(slot, GameSlot):
-            game_pen += (slot.getSize() - slot.getMin()) * pengamemin
+            if slot.getSize() < slot.getMin():
+                game_pen += pengamemin
         else:
-            practice_pen += (slot.getSize() - slot.getMin()) * penpracticemin
+            if slot.getSize() < slot.getMin():
+                practice_pen += penpracticemin
 
     return (game_pen + practice_pen)
 

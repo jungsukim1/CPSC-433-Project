@@ -82,17 +82,6 @@ def parse_input_file():
                     pair.add(tuple(map(str.strip, line.split(","))))
                 elif current_section == "partial_assignments":
                     identifier, day, time = map(str.strip, line.split(","))
-                    if "OPN" in identifier or "PRC" in identifier:
-                        if day == "MO":
-                            partial_assignments[f"WE {time}"].append(identifier)
-                        elif day == "TU":
-                            partial_assignments[f"TH {time}"].append(identifier)
-                    else:
-                        if day == "MO":
-                            partial_assignments[f"WE {time}"].append(identifier)
-                            partial_assignments[f"FR {time}"].append(identifier)
-                        elif day == "TU":
-                            partial_assignments[f"TH {time}"].append(identifier)
                     partial_assignments[f"{day} {time}"].append(identifier)
 
     # Extracting weights and penalties from the command-line arguments
