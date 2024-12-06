@@ -11,15 +11,15 @@ def parse_input_file():
     practices = []
     not_compatible = set()
     unwanted = defaultdict(set)
-    preferences = defaultdict(dict)
+    preferences = defaultdict(list)
     pair = set()
     partial_assignments = defaultdict(list)
 
     # Variables for weightings and penalties
-    wminfilled = 0.0
-    wpref = 0.0
-    wpair = 0.0
-    wsecdiff = 0.0
+    wminfilled = 0
+    wpref = 0
+    wpair = 0
+    wsecdiff = 0
     pengamemin = 0
     penpracticemin = 0
     pennotpaired = 0
@@ -77,7 +77,7 @@ def parse_input_file():
                     unwanted[f"{day} {time}"].add(identifier)
                 elif current_section == "preferences":
                     day, time, identifier, value = map(str.strip, line.split(","))
-                    preferences[f"{identifier}"] = [f"{day} {time}", int(value)]
+                    preferences[f"{identifier}"].append([f"{day} {time}", int(value)])
                 elif current_section == "pair":
                     pair.add(tuple(map(str.strip, line.split(","))))
                 elif current_section == "partial_assignments":
