@@ -59,13 +59,14 @@ def Cross(scheduleA,scheduleB):
         
 #finds a random game
 def Get_rand_game(schedule):
-    index = random.randint(0,len(schedule.gameslots) - 1)
-    chosen_gameSlot = schedule.gameslots[index]
-    
-    while chosen_gameSlot.size == 0:
-        index = random.randint(0,len(schedule.gameslots) - 1)
+
+    while True:
+        index = random.randint(0, len(schedule.gameslots) - 1)
         chosen_gameSlot = schedule.gameslots[index]
+        if chosen_gameSlot.getSize() > 0:
+            break
     
+    print(chosen_gameSlot.games, chosen_gameSlot.getSize())
     taken_game = chosen_gameSlot.removeGame()
     
     #store the game in a temp gameslot object
@@ -77,13 +78,19 @@ def Get_rand_game(schedule):
     
 
 def Get_rand_practice(schedule):
-    index = random.randint(0,len(schedule.practiceslots)- 1)
-    chosen_practiceSlot = schedule.practiceslots[index]
     
-    while chosen_practiceSlot.size == 0:
-        index = random.randint(0,len(schedule.practiceslots) - 1)
+    while True:
+        index = random.randint(0, len(schedule.practiceslots) - 1)
         chosen_practiceSlot = schedule.practiceslots[index]
-        
+        if chosen_practiceSlot.getSize() > 0:
+            break
+    # index = random.randint(0,len(schedule.practiceslots)- 1)
+    # chosen_practiceSlot = schedule.practiceslots[index]
+    
+    # while chosen_practiceSlot.getSize() == 0:
+    #     index = random.randint(0,len(schedule.practiceslots) - 1)
+    #     chosen_practiceSlot = schedule.practiceslots[index]
+    print(chosen_practiceSlot.practices, chosen_practiceSlot.getSize())
     taken_practice = chosen_practiceSlot.removePractice()
     
     #store the game in a temp gameslot object
@@ -94,66 +101,66 @@ def Get_rand_practice(schedule):
     return {"resultSlot" : resultSlot, "indexA" : index} #returns a dict of the slot obj and the index where it was taken from
         
 
-games = ["CMSA U13T3 DIV 01",
-"CMSA U13T3 DIV 02",
-"CUSA O18 DIV 01",
-"CMSA U17T1 DIV 01"]
+# games = ["CMSA U13T3 DIV 01",
+# "CMSA U13T3 DIV 02",
+# "CUSA O18 DIV 01",
+# "CMSA U17T1 DIV 01"]
 
-practices = ["CMSA U13T3 DIV 01 PRC 01",
-"CMSA U13T3 DIV 02 OPN 02",
-"CUSA O18 DIV 01 PRC 01"
-,"CMSA U17T1 PRC 01"]
+# practices = ["CMSA U13T3 DIV 01 PRC 01",
+# "CMSA U13T3 DIV 02 OPN 02",
+# "CUSA O18 DIV 01 PRC 01"
+# ,"CMSA U17T1 PRC 01"]
         
-game1 = GameSlot(1,0,"MO","7:00")
-game1.addGame("CMSA U13T3 DIV 01")
-game2 = GameSlot(1,0,"TU","9:00")
-game2.addGame("CMSA U13T3 DIV 02")
-game3 = GameSlot(1,0,"FR","11:00")
-game3.addGame("CUSA O18 DIV 01")
+# game1 = GameSlot(1,0,"MO","7:00")
+# game1.addGame("CMSA U13T3 DIV 01")
+# game2 = GameSlot(1,0,"TU","9:00")
+# game2.addGame("CMSA U13T3 DIV 02")
+# game3 = GameSlot(1,0,"FR","11:00")
+# game3.addGame("CUSA O18 DIV 01")
 
-prac1 = PracticeSlot(1,0,"MO","7:00")
-prac1.addPractice("CMSA U13T3 DIV 01 PRC 01")
-prac2 = PracticeSlot(1,0,"TU","9:00")
-prac2.addPractice("CMSA U13T3 DIV 02 OPN 02")
+# prac1 = PracticeSlot(1,0,"MO","7:00")
+# prac1.addPractice("CMSA U13T3 DIV 01 PRC 01")
+# prac2 = PracticeSlot(1,0,"TU","9:00")
+# prac2.addPractice("CMSA U13T3 DIV 02 OPN 02")
 
-sched = Schedule([],[])
-sched.gameslots = [game1,game2,game3]
-sched.practiceslots = [prac1,prac2]
-print("schedule A")
-sched.printSchedule()
-print("next\n")
+# sched = Schedule([],[])
+# sched.gameslots = [game1,game2,game3]
+# sched.practiceslots = [prac1,prac2]
+# print("schedule A")
+# sched.printSchedule()
+# print("next\n")
 
-games_2 = ["CMSA U19T1 DIV 01",
-"CSSA U19T2 DIV 01",
-"CUSA O19T1 DIV 01",
-"CUSA O35T1 DIV 01"]
+# games_2 = ["CMSA U19T1 DIV 01",
+# "CSSA U19T2 DIV 01",
+# "CUSA O19T1 DIV 01",
+# "CUSA O35T1 DIV 01"]
 
-practices_2 = ["CUSA U14T2 DIV 02 PRC 03",
-"CMSA U14T2 DIV 02 PRC 04",
-"CMSA U14T3 PRC 01",
-"CSSA U14T3 PRC 02"]
+# practices_2 = ["CUSA U14T2 DIV 02 PRC 03",
+# "CMSA U14T2 DIV 02 PRC 04",
+# "CMSA U14T3 PRC 01",
+# "CSSA U14T3 PRC 02"]
 
-game11 = GameSlot(1,0,"MO","7:00")
-game11.addGame("CMSA U19T1 DIV 01")
-game22 = GameSlot(1,0,"TU","9:00")
-game22.addGame("CSSA U19T2 DIV 01")
-game33 = GameSlot(1,0,"FR","11:00")
-game33.addGame("CUSA O35T1 DIV 01")
+# game11 = GameSlot(1,0,"MO","7:00")
+# game11.addGame("CMSA U19T1 DIV 01")
+# game22 = GameSlot(1,0,"TU","9:00")
+# game22.addGame("CSSA U19T2 DIV 01")
+# game33 = GameSlot(1,0,"FR","11:00")
+# game33.addGame("CUSA O35T1 DIV 01")
 
-prac11 = PracticeSlot(1,0,"MO","7:00")
-prac11.addPractice("CUSA U14T2 DIV 02 PRC 03")
-prac22 = PracticeSlot(1,0,"TU","9:00")
-prac22.addPractice("CMSA U14T3 PRC 01")
+# prac11 = PracticeSlot(1,0,"MO","7:00")
+# prac11.addPractice("CUSA U14T2 DIV 02 PRC 03")
+# prac22 = PracticeSlot(1,0,"TU","9:00")
+# prac22.addPractice("CMSA U14T3 PRC 01")
 
-sched2 = Schedule([],[])
-sched2.gameslots = [game11,game22,game33]
-sched2.practiceslots = [prac11,prac22]
-print("schedule B")
-sched2.printSchedule()
-print("crossing....\n")
+# sched2 = Schedule([],[])
+# sched2.gameslots = [game11,game22,game33]
+# sched2.practiceslots = [prac11,prac22]
+# print("schedule B")
+# sched2.printSchedule()
+# print("crossing....\n")
 
-a,b = Cross(sched,sched2)
-print("new A")
-a.printSchedule()
-print("\nnew B")
-b.printSchedule()
+# a,b = Cross(sched,sched2)
+# print("new A")
+# a.printSchedule()
+# print("\nnew B")
+# b.printSchedule()

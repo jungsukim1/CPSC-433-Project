@@ -18,10 +18,11 @@ class GameSlot:
             self.size -= 1
             return self.games.pop()
         
-        for x in range(random.randint(1,self.size)):
+        for x in range(random.randint(1, len(self.games))):
             temp = self.games.pop()
             self.games.add(temp)
-            self.size -= 1
+        self.size -= 1
+        
         return self.games.pop()
         
     def getSize(self):
@@ -46,10 +47,11 @@ class PracticeSlot:
             self.size -= 1
             return self.practices.pop()
         
-        for x in range(random.randint(1,self.size)):
+        for x in range(random.randint(1, len(self.practices))):
             temp = self.practices.pop()
             self.practices.add(temp)
-            self.size -= 1
+        self.size -= 1
+        
         return self.practices.pop()
     
     def getSize(self):
