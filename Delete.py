@@ -16,6 +16,6 @@ def Delete(fact):
     #         rand_index = random.randint(0,schedule.totalPractices)
     #         schedule.practiceslots[rand_index].removePractice()
     
-    del fact[0]
+    del fact[-1]
     return fact
     
