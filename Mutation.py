@@ -33,6 +33,8 @@ def Mutation(schedule,games,practices):
             selected_gameslot = schedule.gameslots[random_gameslot_index]
             #print(selected_gameslot.games)
             newGame = Generate_Game(schedule,selected_gameslot,availableGames,changed_games)
+            if newGame == None:
+                return None
             changed_games.append(selected_gameslot.removeGame())
             selected_gameslot.addGame(newGame)
             
@@ -40,6 +42,8 @@ def Mutation(schedule,games,practices):
             random_practiceslot_index = random.randint(0, len(schedule.practiceslots) - 1)
             selected_practiceslot = schedule.practiceslots[random_practiceslot_index]
             newPractice = Generate_Practice(schedule,selected_practiceslot,availablePractices,changed_games)
+            if newPractice == None:
+                return None
             changed_practices.append(selected_practiceslot.removePractice())
             selected_practiceslot.addPractice(newPractice)
     
@@ -49,6 +53,9 @@ def Mutation(schedule,games,practices):
 
 def Generate_Game(schedule,gameSlot,games,changed_games): 
     temp_arr = games.copy()
+    
+    if len(temp_arr) == 0:
+        return None
     
     if len(temp_arr) != 1:
         rand_game_index = random.randint(0, len(temp_arr)-1)
@@ -66,6 +73,9 @@ def Generate_Game(schedule,gameSlot,games,changed_games):
 #finds a game that isnt in the slot already
 def Generate_Practice(schedule,practiceSlot,practices,changed_games): 
     temp_arr = practices.copy()
+    
+    if len(temp_arr) == 0:
+        return None
     
     if len(temp_arr) != 1:
         rand_game_index = random.randint(0, len(temp_arr)-1)
