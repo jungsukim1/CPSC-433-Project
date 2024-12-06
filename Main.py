@@ -464,7 +464,8 @@ for i in range(0, 100):
 #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
 #         print(slot.practices)
 
-# crossFact = Cross(newFact, secondNewFact)
+crossFact = Cross(newFact, secondNewFact)
+print("done")
 
 # for slot in newFact:
 #     if(isinstance(slot, GameSlot)):

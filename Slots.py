@@ -18,12 +18,11 @@ class GameSlot:
             self.size -= 1
             return self.games.pop()
         
-        for x in range(random.randint(1, len(self.games))):
-            temp = self.games.pop()
-            self.games.add(temp)
+        element = random.choice(list(self.games))
+        self.games.remove(element)
         self.size -= 1
         
-        return self.games.pop()
+        return element
         
     def getSize(self):
         return len(self.games)
@@ -50,12 +49,11 @@ class PracticeSlot:
             self.size -= 1
             return self.practices.pop()
         
-        for x in range(random.randint(1, len(self.practices))):
-            temp = self.practices.pop()
-            self.practices.add(temp)
+        element = random.choice(list(self.practices))
+        self.practices.remove(element)
         self.size -= 1
         
-        return self.practices.pop()
+        return element
     
     def getSize(self):
         return len(self.practices)

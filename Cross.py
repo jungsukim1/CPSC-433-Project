@@ -1,26 +1,34 @@
 from Slots import GameSlot, PracticeSlot
 from Schedule import Schedule
 import random
+import math
 
 def Cross(scheduleA,scheduleB):
     
     temp_games_list = [] 
     temp_practices_list = [] 
+    temp_games_listB = []
+    temp_practices_listB = []
     
     schedA_gameslots = scheduleA.getTotalGames()
+    schedA_practiceslots = scheduleA.getTotalPractices()
+    schedB_gameslots = scheduleA.getTotalGames()
     schedB_practiceslots = scheduleA.getTotalPractices()
     totalobjectsA = scheduleA.getTotalGames() + scheduleA.getTotalPractices()   
     totalobjectsB = scheduleB.getTotalGames() + scheduleB.getTotalPractices()
     
     #the max loop amount is the totalnumber of games+practice of the smaller sched incase they arent the same size
     loop_max = totalobjectsA if totalobjectsA < totalobjectsB else totalobjectsB 
+    loop_max /= 4
+    loop_max = round(loop_max)
     
+    #print("aiofhhgrogirg" ,str(loop_max),str(totalobjectsA),str(totalobjectsB) )
     #random num of game/prac to cross
-    for i in range (random.randint(1,loop_max - 1)):
+    for i in range (random.randint(1,loop_max)):
         
         if (schedA_gameslots == len(temp_games_list)):
             what_to_change = 0
-        elif (schedB_practiceslots == len(temp_practices_list)):
+        elif (schedA_practiceslots == len(temp_practices_list)):
             what_to_change = 1
         else:
             what_to_change = random.randint(0,1) #choose prac or game
@@ -32,27 +40,59 @@ def Cross(scheduleA,scheduleB):
         else:
             taken_practiceSlot = Get_rand_practice(scheduleA)
             temp_practices_list.append(taken_practiceSlot)
+            
+    for i in range (random.randint(1,loop_max - 1)):
+        
+        if (schedB_gameslots == len(temp_games_listB)):
+            what_to_change = 0
+        elif (schedB_practiceslots == len(temp_practices_listB)):
+            what_to_change = 1
+        else:
+            what_to_change = random.randint(0,1) #choose prac or game
+        
+        if what_to_change == 1: 
+            taken_gameSlot = Get_rand_game(scheduleB)
+            temp_games_listB.append(taken_gameSlot)
+        else:
+            taken_practiceSlot = Get_rand_practice(scheduleB)
+            temp_practices_listB.append(taken_practiceSlot)
     
     for gameSlotADict in temp_games_list:
-        replacement_slotA = scheduleA.gameslots[gameSlotADict["indexA"]]
         gameSlotA = gameSlotADict["resultSlot"]
         
         #loop through all slots of sched B
         for gameSlotB in scheduleB.gameslots: 
             #if this slot day/time matches the one we are replacing 
             if gameSlotB.day == gameSlotA.day and gameSlotB.startTime == gameSlotA.startTime:
-                replacement_slotA.addGame(gameSlotB.removeGame())
                 gameSlotB.addGame(gameSlotA.removeGame())
                 break
                     
     for practiceSlotADict in temp_practices_list:
-        replacement_slotA = scheduleA.practiceslots[practiceSlotADict["indexA"]]
         practiceSlotA = practiceSlotADict["resultSlot"]
         
         for practiceSlotB in scheduleB.practiceslots:
             if practiceSlotB.day == practiceSlotA.day and practiceSlotB.startTime == practiceSlotA.startTime:
-                replacement_slotA.addPractice(practiceSlotB.removePractice())
                 practiceSlotB.addPractice(practiceSlotA.removePractice())
+                break
+    
+#===================================================================================================================
+    
+    for gameSlotBDict in temp_games_listB:
+        gameSlotB = gameSlotBDict["resultSlot"]
+        
+        #loop through all slots of sched B
+        for gameSlotA in scheduleA.gameslots: 
+            #if this slot day/time matches the one we are replacing 
+            if gameSlotA.day == gameSlotB.day and gameSlotB.startTime == gameSlotA.startTime:
+                gameSlotA.addGame(gameSlotB.removeGame())
+                break
+                    
+    for practiceSlotBDict in temp_practices_listB:
+        practiceSlotB = practiceSlotBDict["resultSlot"]
+        
+        for practiceSlotA in scheduleA.practiceslots:
+            if practiceSlotA.day == practiceSlotB.day and practiceSlotB.startTime == practiceSlotA.startTime:
+                practiceSlotA.addPractice(practiceSlotB.removePractice())
                 break
     
     return (scheduleA,scheduleB) #return tuple of sched A and B
@@ -60,15 +100,29 @@ def Cross(scheduleA,scheduleB):
 #finds a random game
 def Get_rand_game(schedule):
 
-    while True:
-        index = random.randint(0, len(schedule.gameslots) - 1)
+    available_indices = list(range(len(schedule.gameslots)))
+
+    while available_indices:
+        # Randomly pick an index from the available indices
+        index = random.choice(available_indices)
         chosen_gameSlot = schedule.gameslots[index]
+
+        #print(chosen_gameSlot.games, chosen_gameSlot.getSize(), "index", index)
+
+        # Check if the chosen slot is valid (not empty)
         if chosen_gameSlot.getSize() > 0:
+            break  # Found a non-empty slot, exit the loop
+
+        # Remove the index from available indices because it's empty
+        available_indices.remove(index)
+        if not available_indices:
+            print("All slots are empty")
             break
     
-    print(chosen_gameSlot.games, chosen_gameSlot.getSize())
+    #print(chosen_gameSlot.games, chosen_gameSlot.getSize())
     taken_game = chosen_gameSlot.removeGame()
     
+    #print("out (games)")
     #store the game in a temp gameslot object
     #purpose was to store the gameitself and day/time, you could technically use a dict instead but nah
     resultSlot = GameSlot(-1,-1,chosen_gameSlot.day,chosen_gameSlot.startTime)
@@ -79,19 +133,35 @@ def Get_rand_game(schedule):
 
 def Get_rand_practice(schedule):
     
-    while True:
-        index = random.randint(0, len(schedule.practiceslots) - 1)
+    available_indices = list(range(len(schedule.practiceslots)))
+
+    while available_indices:
+        # Randomly pick an index from the available indices
+        index = random.choice(available_indices)
         chosen_practiceSlot = schedule.practiceslots[index]
+
+        #print(chosen_practiceSlot.practices, chosen_practiceSlot.getSize(), "index", index)
+
+        # Check if the chosen slot is valid (not empty)
         if chosen_practiceSlot.getSize() > 0:
+            break  # Found a non-empty slot, exit the loop
+
+        # Remove the index from available indices because it's empty
+        available_indices.remove(index)
+        
+        if not available_indices:
+            print("All slots are empty")
             break
+        
     # index = random.randint(0,len(schedule.practiceslots)- 1)
     # chosen_practiceSlot = schedule.practiceslots[index]
     
     # while chosen_practiceSlot.getSize() == 0:
     #     index = random.randint(0,len(schedule.practiceslots) - 1)
     #     chosen_practiceSlot = schedule.practiceslots[index]
-    print(chosen_practiceSlot.practices, chosen_practiceSlot.getSize())
+    #print(chosen_practiceSlot.practices, chosen_practiceSlot.getSize())
     taken_practice = chosen_practiceSlot.removePractice()
+    #print("out (practice)")
     
     #store the game in a temp gameslot object
     #purpose was to store the gameitself and day/time, you could technically use a dict instead but nah
