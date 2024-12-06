@@ -39,10 +39,14 @@ def Cross(scheduleA,scheduleB,partial_assign):
         
         if what_to_change == 1: 
             taken_gameSlot = Get_rand_game(scheduleA,partial_assign)
+            if taken_gameSlot == None:
+                return None, None
             temp_games_list.append(taken_gameSlot)
         
         else:
             taken_practiceSlot = Get_rand_practice(scheduleA,partial_assign)
+            if taken_practiceSlot == None:
+                return None, None
             temp_practices_list.append(taken_practiceSlot)
             
     for i in range (loop_amount):
@@ -56,9 +60,13 @@ def Cross(scheduleA,scheduleB,partial_assign):
         
         if what_to_change == 1: 
             taken_gameSlot = Get_rand_game(scheduleB,partial_assign)
+            if taken_gameSlot == None:
+                return None, None
             temp_games_listB.append(taken_gameSlot)
         else:
             taken_practiceSlot = Get_rand_practice(scheduleB,partial_assign)
+            if taken_practiceSlot == None:
+                return None, None
             temp_practices_listB.append(taken_practiceSlot)
     
     for gameSlotADict in temp_games_list:
@@ -121,7 +129,7 @@ def Get_rand_game(schedule,partial_as):
         available_indices.remove(index)
         if not available_indices:
             print("All slots are empty")
-            break
+            return None
     
     print(chosen_gameSlot.games, chosen_gameSlot.getSize())
     taken_game = chosen_gameSlot.removeGame()
@@ -155,7 +163,7 @@ def Get_rand_practice(schedule,partial_as):
         
         if not available_indices:
             print("All slots are empty")
-            break
+            return None
         
     # index = random.randint(0,len(schedule.practiceslots)- 1)
     # chosen_practiceSlot = schedule.practiceslots[index]
