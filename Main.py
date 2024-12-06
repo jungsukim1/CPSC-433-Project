@@ -358,6 +358,9 @@ def constr(fact):
     team_dict = {}
     isEmpty = True
 
+    if not fact:
+        return False
+
     if fact == DEFAULTFACT:
         return False
 
@@ -451,7 +454,7 @@ def SetbasedAI():
         return print("Input BAD")
     if not addPartialAssign():
         return print("Slot missing for Partial Assignment")
-    numGen = 1000
+    numGen = 1
     generated = 0
     firstSchedule = OrTree(DEFAULTFACT, games, practices)
     firstSchedule.eval = Eval(firstSchedule, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
@@ -509,10 +512,10 @@ def SetbasedAI():
             FACTS.append(fixedCrossFact2)
             generated += 2
         
-        FACTS = sorted(FACTS, key=lambda x: x.eval)
+        FACTS.sort(key=lambda x: x.eval)
 
         if len(FACTS) > keeps:
-            Delete(FACTS)
+            Delete(FACTS, keeps)
     
     return FACTS
 
