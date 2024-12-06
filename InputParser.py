@@ -77,7 +77,8 @@ def parse_input_file():
                     unwanted[f"{day} {time}"].add(identifier)
                 elif current_section == "preferences":
                     day, time, identifier, value = map(str.strip, line.split(","))
-                    preferences[f"{day} {time} {identifier}"] = float(value)
+                    # preferences[f"{day} {time} {identifier}"] = float(value)
+                    preferences[f"{identifier}"] = [f"{day} {time}", int(value)]
                 elif current_section == "pair":
                     pair.add(tuple(map(str.strip, line.split(","))))
                 elif current_section == "partial_assignments":
