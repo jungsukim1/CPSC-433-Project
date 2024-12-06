@@ -23,6 +23,9 @@ class GameSlot:
     def getSize(self):
         return len(self.games)
     
+    def getMin(self):
+        return self.min
+    
 class PracticeSlot:
     
     def __init__(self, max, min, day, startTime):
@@ -46,3 +49,6 @@ class PracticeSlot:
     
     def getSize(self):
         return len(self.practices)
+    
+    def getMin(self):
+        return self.min
