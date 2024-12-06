@@ -112,7 +112,7 @@ def OrTree(fact, games, practices):
         # Create shallow copies of gameslots and practiceslots
         if fact == None:
             fact = DEFAULTFACT
-        tempFact = copy.deepcopy(fact)
+        tempFact = fact
         
         newFact = Schedule([], [])  # Reset newFact as an empty Schedule object
         assignedGames = set()  # Reset the set of assigned games
@@ -300,9 +300,7 @@ def partConstr(fact, slot):
 
         # Check not compatible set
         for sets in not_compatible:
-            if all(team in teams["games"] for team in sets): 
-                return False
-            if all(team in teams["practices"] for team in sets):
+            if all(team in teams["games"] for team in sets) or all(team in teams["practices"] for team in sets):
                 return False
 
         # Same team assigned game and practice on same day and time
@@ -344,7 +342,7 @@ def constr(fact):
     if fact == DEFAULTFACT:
         return False
 
-    #check gamesmax and practicemax (DONE)
+    #check gamesmax and practicemax
     for slot in fact.gameslots + fact.practiceslots:
         time_slot = f"{slot.day} {slot.startTime}"
         if (isinstance(slot, GameSlot)):
@@ -373,7 +371,7 @@ def constr(fact):
     u13_pair = {"CMSA U13T1S", "CMSA U13T1"}
     u12_pair = {"CMSA U12T1S", "CMSA U12T1"}
 
-        #iterating through every time slot and seeing what practices and games are inside
+    #iterating through every time slot and seeing what practices and games are inside
     #checking which hard constraints will fail
     for time_slot, teams in team_dict.items():
         #removing extras from the team names such as prc 01 and opn 01 so that we can find overlap between games and practices
@@ -393,9 +391,7 @@ def constr(fact):
 
         # Check not compatible set
         for sets in not_compatible:
-            if all(team in teams["games"] for team in sets): 
-                return False
-            if all(team in teams["practices"] for team in sets):
+            if all(team in teams["games"] for team in sets) or all(team in teams["practices"] for team in sets): 
                 return False
 
         # Same team assigned game and practice on same day and time
