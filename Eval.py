@@ -79,6 +79,7 @@ def eval_pair(fact, pair, pennotpaired):
     print(f"pairs {val}")
     return val
 
+#sec diff needs to check tier ranges
 def eval_secdiff(fact, pensection):
 
     team_dict = {}
