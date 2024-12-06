@@ -56,7 +56,7 @@ def create_game_and_practice_slots(game_slots, practice_slots):
 game_slot_objects, practice_slot_objects = create_game_and_practice_slots(game_slots, practice_slots)
 
 
-DEFAULTFACT = Schedule()
+DEFAULTFACT = Schedule([], [])
 
 # Append all GameSlot objects to the array
 for game_slot in game_slot_objects.values():
@@ -108,9 +108,11 @@ def OrTree(fact, games, practices):
 
     while True:
         # Create shallow copies of gameslots and practiceslots
+        if fact == None:
+            fact = DEFAULTFACT
         tempFact = fact
         
-        newFact = Schedule()  # Reset newFact as an empty Schedule object
+        newFact = Schedule([], [])  # Reset newFact as an empty Schedule object
         assignedGames = set()  # Reset the set of assigned games
         assignedPractice = set()  # Reset the set of assigned practices
         moGamesAssigned = defaultdict(list)
@@ -221,7 +223,6 @@ def OrTree(fact, games, practices):
 
     # if timedOut:
     #     return timedOut
-
     return newFact
 
 

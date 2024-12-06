@@ -33,11 +33,9 @@ class Schedule:
         self.practiceslots.append(practiceslot)
     
     def removeGameSlot(self):
-        self.totalGames -= 1
         return self.gameslots.pop()
         
     def removePracticeSlot(self):
-        self.totalPractices -= 1
         return self.practiceslots.pop()
         
     def removeSpecificGameSlot(self,gameSlot):
@@ -47,7 +45,6 @@ class Schedule:
         
         # if gameSlot in self.gameslots:
         self.gameslots.remove(gameSlot)
-        self.totalGames -= 1
         
     def removeSpecficPracticeSlot(self,practiceSlot):
         if not isinstance(practiceSlot, PracticeSlot):
@@ -55,7 +52,6 @@ class Schedule:
             return
         # if practiceSlot in self.practiceslots:
         self.practiceslots.remove(practiceSlot)
-        self.totalPractices -= 1
 
     def printSchedule(self):
         for i in range(0,len(self.gameslots)):

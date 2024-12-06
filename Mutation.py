@@ -17,13 +17,13 @@ def Mutation(schedule,games,practices):
     changed_practices = []
     
     #loop for how many games we will change
-    for i in range(random.randint(1,(schedule.totalGames + schedule.totalPractices - 1))):
+    for i in range(random.randint(1,(schedule.getTotalGames() + schedule.getTotalPractices() - 1))):
         
-        if (len(changed_games) + schedule.totalGames == len(games)):
+        if (len(changed_games) + schedule.getTotalGames() == len(games)):
             loop_range = 0
-        elif (len(changed_practices) + schedule.totalPractices == len(games)):
+        elif (len(changed_practices) + schedule.getTotalPractices() == len(games)):
             loop_range = 1
-        elif (len(changed_games) + schedule.totalGames == len(games) and len(changed_practices) + schedule.totalPractices == len(games)):
+        elif (len(changed_games) + schedule.getTotalGames() == len(games) and len(changed_practices) + schedule.getTotalPractices() == len(games)):
             break
         else:
             loop_range = random.randint(0,1) 
@@ -85,44 +85,44 @@ def Schedule_check(schedule,game,practice):
             if game in gameslots.games:
                 return False
     else:
-        for practiceslots in sched.practiceslots:
+        for practiceslots in schedule.practiceslots:
             if practice in practiceslots.practices:
                 return False
     
     return True
 
 
-games = ["CMSA U13T3 DIV 01",
-"CMSA U13T3 DIV 02",
-"CUSA O18 DIV 01",
-"CMSA U17T1 DIV 01"]
+# games = ["CMSA U13T3 DIV 01",
+# "CMSA U13T3 DIV 02",
+# "CUSA O18 DIV 01",
+# "CMSA U17T1 DIV 01"]
 
-practices = ["CMSA U13T3 DIV 01 PRC 01",
-"CMSA U13T3 DIV 02 OPN 02",
-"CUSA O18 DIV 01 PRC 01"
-,"CMSA U17T1 PRC 01"]
+# practices = ["CMSA U13T3 DIV 01 PRC 01",
+# "CMSA U13T3 DIV 02 OPN 02",
+# "CUSA O18 DIV 01 PRC 01"
+# ,"CMSA U17T1 PRC 01"]
         
-game1 = GameSlot(1,0,"MO","7:00")
-game1.addGame("CMSA U13T3 DIV 01")
-game2 = GameSlot(1,0,"TU","9:00")
-game2.addGame("CMSA U13T3 DIV 02")
-game3 = GameSlot(1,0,"FR","11:00")
-game3.addGame("CUSA O18 DIV 01")
+# game1 = GameSlot(1,0,"MO","7:00")
+# game1.addGame("CMSA U13T3 DIV 01")
+# game2 = GameSlot(1,0,"TU","9:00")
+# game2.addGame("CMSA U13T3 DIV 02")
+# game3 = GameSlot(1,0,"FR","11:00")
+# game3.addGame("CUSA O18 DIV 01")
 
-prac1 = PracticeSlot(1,0,"MO","7:00")
-prac1.addPractice("CMSA U13T3 DIV 01 PRC 01")
-prac2 = PracticeSlot(1,0,"TU","9:00")
-prac2.addPractice("CMSA U13T3 DIV 02 OPN 02")
+# prac1 = PracticeSlot(1,0,"MO","7:00")
+# prac1.addPractice("CMSA U13T3 DIV 01 PRC 01")
+# prac2 = PracticeSlot(1,0,"TU","9:00")
+# prac2.addPractice("CMSA U13T3 DIV 02 OPN 02")
 
-sched = Schedule([],[])
-sched.gameslots = [game1,game2,game3]
-sched.totalGames = 3
-sched.totalPractices = 2
-sched.practiceslots = [prac1,prac2]
-sched.printSchedule()
-print("next")
+# sched = Schedule([],[])
+# sched.gameslots = [game1,game2,game3]
+# sched.totalGames = 3
+# sched.totalPractices = 2
+# sched.practiceslots = [prac1,prac2]
+# sched.printSchedule()
+# print("next")
 
 
 
-a = Mutation(sched,games,practices)
-a.printSchedule()
+# a = Mutation(sched,games,practices)
+# a.printSchedule()
