@@ -30,17 +30,17 @@ def eval_pref(fact, preferences):
                 # else:
                 #     pref_val += pen_val
 
-                if preferences[games]:
-                    if time_slot != preferences[games][0]:
-                        pref_val += preferences[games][1]
+                for pref in preferences[games]:
+                    if time_slot != pref[0]:
+                        pref_val += pref[1]
                     # else:
                     #     print(preferences[games], games)
                         
         else:
             for practices in slot.practices:
-                if preferences[practices]:
-                    if time_slot != preferences[practices][0]:
-                        pref_val += preferences[practices][1]
+                for pref in preferences[practices]:
+                    if time_slot != pref[0]:
+                        pref_val += pref[1]
                     # else:
                     #     print(preferences[practices], practices)
                 # practice_slot = f"{time_slot} {practices}"
@@ -72,6 +72,7 @@ def eval_pair(fact, pair, pennotpaired):
     for time_slot, teams in team_dict.items():
         combined_teams = teams["games"].union(teams["practices"])
         partial_pairs = [pair for pair in slot_pair if sum(team in combined_teams for team in pair) == 1]
+        print(partial_pairs)
 
         if partial_pairs:
             val += pennotpaired
@@ -89,28 +90,34 @@ def eval_secdiff(fact, pensection):
         time_slot = f"{slot.day} {slot.startTime}"
         if (isinstance(slot, GameSlot)):
             if time_slot not in team_dict:
-                team_dict[time_slot] = {"games": set(), "practices": set()}
+                team_dict[time_slot] = {"games": set()}
             team_dict[time_slot]["games"].update(slot.games)
 
     for time_slot, teams in team_dict.items():
-        overlap_teams = [team.split("DIV")[0].strip() for team in teams["games"]]
-        overlap_count = Counter(overlap_teams)
+        overlap_teams = [team.split(" ") for team in teams["games"]]
+        # print(overlap_teams)
         # duplicate_teams = [team for team, count in overlap_count.items() if count > 1]
         # duplicates = [team for team in teams["games"] if team.split("DIV")[0].strip() in duplicate_teams]
         
-        duplicate_teams = []
-        for team, count in overlap_count.items():
-            if count > 1:
-                duplicate_teams.append(team)
+        for i in range(len(overlap_teams)):
+            for j in range(i + 1, len(overlap_teams)):  # Avoid comparing the same pair twice
+                if overlap_teams[i][1] == overlap_teams[j][1]:
+                      if (int(overlap_teams[j][-1]) - int(overlap_teams[i][-1])) == 1:
+                        val += pensection
+                    
+        # duplicate_teams = []
+        # for team, count in overlap_count.items():
+        #     if count > 1:
+        #         duplicate_teams.append(team)
                 
                 
-        duplicates = []
-        for team in teams["games"]:
-            if team.split("DIV")[0].strip() in duplicate_teams:
-                duplicates.append(team)
+        # duplicates = []
+        # for team in teams["games"]:
+        #     if team.split("DIV")[0].strip() in duplicate_teams:
+        #         duplicates.append(team)
         
-        if len(duplicates) > 1:
-            val += pensection
+        # if len(duplicates) > 1:
+        #     val += pensection
             
     # print("Sec Diff", duplicates)
     print(f"secdiff {val}")
