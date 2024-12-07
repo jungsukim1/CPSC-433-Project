@@ -28,8 +28,6 @@ def Cross(scheduleA,scheduleB):
     while practiceSwapRanger > 0:
         practiceSlot1 = scheduleA.practiceslots[randomStartIndex]
         practiceSlot2 = scheduleB.practiceslots[randomStartIndex]
-        print(practiceSlot1.practices)
-        print(practiceSlot2.practices)
         tempSlot = practiceSlot1.practices
         practiceSlot1.practices = practiceSlot2.practices
         practiceSlot2.practices = tempSlot
