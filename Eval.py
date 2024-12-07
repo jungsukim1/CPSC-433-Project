@@ -3,7 +3,6 @@ from collections import Counter
 
 def eval_minfilled(fact, pengamemin, penpracticemin):
     game_pen = 0
-    
     practice_pen = 0
     
     for slot in fact.gameslots + fact.practiceslots:
@@ -32,12 +31,9 @@ def eval_pref(fact, preferences):
                 for pref in preferences[practices]:
                     if time_slot != pref[0]:
                         pref_val += pref[1]
-
-    print(f"pref {pref_val}")
     return pref_val
 
 def eval_pair(fact, pair, pennotpaired):
-    
     slot_pair = pair
     val = 0
     team_dict = {}
@@ -55,13 +51,10 @@ def eval_pair(fact, pair, pennotpaired):
 
     for time_slot, teams in team_dict.items():
         combined_teams = teams["games"].union(teams["practices"])
-        partial_pairs = [pair for pair in slot_pair if sum(team in combined_teams for team in pair) == 1]
-
-        if partial_pairs:
-            val += pennotpaired
-    
-    print(f"pairs {val}")
-    return val
+        for pair in slot_pair:
+            if (pair[0] in combined_teams) ^ (pair[1] in combined_teams):
+                val += pennotpaired 
+    return val/2
 
 #sec diff needs to check tier ranges
 def eval_secdiff(fact, pensection):
@@ -83,9 +76,7 @@ def eval_secdiff(fact, pensection):
             for j in range(i + 1, len(overlap_teams)):
                 if overlap_teams[i][1] == overlap_teams[j][1]:
                       if (int(overlap_teams[j][-1]) - int(overlap_teams[i][-1])) == 1:
-                        val += pensection
-                    
-    print(f"secdiff {val}")
+                        val += pensection               
     return val
 
 def Eval(fact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection):

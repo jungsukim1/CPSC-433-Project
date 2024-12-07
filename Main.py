@@ -537,7 +537,7 @@ def SetbasedAI():
     firstSchedule = OrTree(DEFAULTFACT, games, practices)
     firstSchedule.eval = Eval(firstSchedule, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
     FACTS.append(firstSchedule)
-    mutFact = Mutation(FACTS[0], games, practices, PARTIAL_ASSIGNMENTS)
+    mutFact = Mutation(FACTS[0])
     fixedMutFact = OrTree(mutFact, games, practices)
     fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
     keeps = 5
@@ -545,7 +545,7 @@ def SetbasedAI():
     while generated < numGen:
         mutOrCross = 0
         if mutOrCross == 0:
-            mutFact = Mutation(FACTS[0], games)
+            mutFact = Mutation(FACTS[0])
             fixedMutFact = OrTree(mutFact, games, practices)
             fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
             print(fixedMutFact.eval)

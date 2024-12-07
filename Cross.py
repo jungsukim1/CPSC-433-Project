@@ -5,6 +5,8 @@ import math
 
 def Cross(scheduleA,scheduleB):
     day_order = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4}
+    if (not scheduleA.gameslots and not scheduleB.gameslots):
+        return
     scheduleA.gameslots.sort(key=lambda slot: (day_order[slot.day], slot.startTime))
     scheduleB.gameslots.sort(key=lambda slot: (day_order[slot.day], slot.startTime))
     gameSwapRanger = random.randint(2, 5)
@@ -17,7 +19,8 @@ def Cross(scheduleA,scheduleB):
         gameSlot2.games = tempSlot
         gameSwapRanger -= 1
         randomStartIndex += 1
-    
+    if (not scheduleA.practiceslots and not scheduleB.practiceslots):
+        return
     scheduleA.practiceslots.sort(key=lambda slot: (day_order[slot.day], slot.startTime))
     scheduleB.practiceslots.sort(key=lambda slot: (day_order[slot.day], slot.startTime))
     practiceSwapRanger = random.randint(2, 5)

@@ -9,12 +9,16 @@ import random
 #practices - all possible practices
 #TODO connect with ORTree and test that it works
 def Mutation(schedule):
+    if (not schedule.gameslots):
+        return
     for i in range(1, random.randint(1, 5)):
         gameSlot1 = random.choice(schedule.gameslots)
         gameSlot2 = random.choice(schedule.gameslots)
         tempGames = gameSlot1.games
         gameSlot1.games = gameSlot2.games
         gameSlot2.games = tempGames
+    if (not schedule.practiceslots):
+        return
     for i in range(1, random.randint(1, 5)):
         practiceSlot1 = random.choice(schedule.practiceslots)
         practiceSlot2 = random.choice(schedule.practiceslots)
