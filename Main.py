@@ -57,15 +57,42 @@ def create_game_and_practice_slots(game_slots, practice_slots):
 
 
 def verifyInput():
+    gamesTotal = 0
+    practiceTotal = 0
+
+    for slot in game_slots:
+        gamesTotal += game_slots[slot]['max']
+    for slot in practice_slots:
+        practiceTotal += practice_slots[slot]['max']
+
     if not games and not practices:
+        print("No games and practices")
         return False
     if not game_slots and practice_slots:
+        print("No game slots and practice slots")
         return False
     if games and not game_slots:
+        print("Games exist but no slots")
         return False
     if practices and not practice_slots:
+        print("Practice exist but no slots")
+        return False
+    if any('CMSA U12T1' in game for game in games) or any('CMSA U13T1' in game for game in games):
+        if not any(
+            schedule.day == "TU" and schedule.startTime == "18:00" and isinstance(schedule, PracticeSlot)
+            for schedule in DEFAULTFACT.practiceslots
+        ):
+            print("No Special Team Slot Exist!")
+            return False
+    
+    if len(games) > gamesTotal:
+        print("Not enough Game slots")
+        return False
+    if len(practices) > practiceTotal:
+        print("Not enough Practice slots")
         return False
     return True
+
 
 
 
@@ -86,12 +113,7 @@ for practice_slot in practice_slot_objects.values():
     DEFAULTFACT.addPracticeSlot(practice_slot)
 
 def addPartialAssign():
-
-    # if partial_assignments:
-    #     for key in partial_assignments:
-    #         if key not in DEFAULTFACT.gameslots + DEFAULTFACT.practiceslots:
-    #             print("Partial Assign cannot be assigned")
-    #             return False
+                
     gamesTotal = 0
     practiceTotal = 0
     assignedSpectial = False
@@ -106,8 +128,8 @@ def addPartialAssign():
                     schedule.addPractice(partial_assignments[key][0])
                     if partial_assignments[key][0] not in PARTIAL_ASSIGNMENTS:
                         PARTIAL_ASSIGNMENTS.append(partial_assignments[key][0])
-                    if partial_assignments[key][0] in practices:
-                        practices.remove(partial_assignments[key][0])
+                    # if partial_assignments[key][0] in practices:
+                    #     practices.remove(partial_assignments[key][0])
                     del partial_assignments[key]
         else:
             gamesTotal += schedule.max
@@ -116,32 +138,27 @@ def addPartialAssign():
                     schedule.addGame(partial_assignments[key][0])
                     if partial_assignments[key][0] not in PARTIAL_ASSIGNMENTS:
                         PARTIAL_ASSIGNMENTS.append(partial_assignments[key][0])
-                    if partial_assignments[key][0] in games:
-                        games.remove(partial_assignments[key][0])
+                    # if partial_assignments[key][0] in games:
+                    #     games.remove(partial_assignments[key][0])
                     del partial_assignments[key]
-
         if (schedule.day == "TU" and schedule.startTime == "18:00" and isinstance(schedule, PracticeSlot)):
             if any('CMSA U12T1' in game for game in games):
                 if 'CMSA U12T1S' not in PARTIAL_ASSIGNMENTS:
                     PARTIAL_ASSIGNMENTS.append('CMSA U12T1S')
-                    assignedSpectial = True
                 schedule.addPractice('CMSA U12T1S')
             if any('CMSA U13T1' in game for game in games):
                 if 'CMSA U13T1S' not in PARTIAL_ASSIGNMENTS:
                     PARTIAL_ASSIGNMENTS.append('CMSA U13T1S')
-                    assignedSpectial = True
                 schedule.addPractice('CMSA U13T1S')
-    if len(games) > gamesTotal:
-        print("Not enough Game slots")
-        return False
-    if len(practices) > practiceTotal:
-        print("Not enough Practice slots")
-        return False
+    
     return True
 
 def OrTree(fact, games, practices):
     if fact == None:
         fact = DEFAULTFACT
+
+    games = [game for game in games if game not in PARTIAL_ASSIGNMENTS]
+    practices = [practice for practice in practices if practice not in PARTIAL_ASSIGNMENTS]
 
     if constr(fact):
         return fact
@@ -157,9 +174,9 @@ def OrTree(fact, games, practices):
         tuGamesAssigned = defaultdict(list)
         moPracticesAssigned = defaultdict(list)
         tuPracticesAssigned = defaultdict(list)
-        if time.time() - startTime > 5:
-            print("No Valid Schedule Found")
-            break
+        # if time.time() - startTime > 5:
+        #     print("No Valid Schedule Found")
+        #     break
 
         while tempFact.gameslots or tempFact.practiceslots:  # Process all slots in tempFact
             # Combine both gameslots and practiceslots into one list
@@ -178,7 +195,7 @@ def OrTree(fact, games, practices):
             # Add the slot to newFact to ensure it is not lost
                 
             if isinstance(slot, GameSlot):  # Handle game slots
-                if (slot.day == "MO") or (slot.day == "TU" and slot.startTime != "11:00") or (slot.day == "TH" and slot.startTime == "12:30"):
+                if (slot.day == "MO") or (slot.day == "TU" and slot.startTime != "11:00"):
                     # Remove games that fail partial constraints
                     for game in list(slot.games):
                         if not partConstr(newFact, slot):
@@ -242,9 +259,19 @@ def OrTree(fact, games, practices):
                             slot.practices.discard(ranPractice)
                             assignedPractice.discard(ranPractice)
                         availablePractice.remove(ranPractice)
-
+            
+        # for slot in newFact.gameslots + newFact.practiceslots:
+        #     if(isinstance(slot, GameSlot)):
+        #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+        #         print(slot.games)
+        #     else:
+        #         print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
+        #         print(slot.practices)
         if constr(newFact):
             break  # Exit inner loop if constraints are satisfied
+        else:
+            # If constraints are not satisfied, reset 'fact' to DEFAULTFACT and retry
+            fact = DEFAULTFACT
 
     # for slot in newFact.gameslots + newFact.practiceslots:
     #     if isinstance(slot, GameSlot):
@@ -261,8 +288,6 @@ def OrTree(fact, games, practices):
     #         elif slot.day == "TH":
     #             for practice in tuPracticesAssigned[slot.startTime]:
     #                 slot.addPractice(practice)
-
-    print(len(games))
 
     return newFact
 
@@ -289,8 +314,7 @@ def specialBookingsChecker(team_dict, isPractice):
                 
     return False
 
-def partConstr(fact, slot):
-    
+def partConstr(fact, slot):    
     #Checking if game max or practice max has been reached
     if isinstance(slot, GameSlot):
         if len(slot.games) > slot.max:
@@ -328,33 +352,39 @@ def partConstr(fact, slot):
         day, time = time_slot.split(" ")
 
         # DIV 9 are all evening
-        if time <= "18:00":
-            if  [name for name in combined_teams if 'DIV 9' in name]:
+        if  [name for name in combined_teams if re.search(r'\bDIV 9\d+\b', name)]:
+            if time > "18:00":
+                #print("Part Evening")
                 return False
 
         # No games Tuesday 11-12:30
         if day == "TU" and "11:00" <= time <= "12:30":
             if teams["games"]:
+                #print("Part Game on Tues 11")
                 return False
 
         # Check not compatible set
         for sets in not_compatible:
             if all(team in teams["games"] for team in sets) or all(team in teams["practices"] for team in sets):
+                #print("Part Not Compatible")
                 return False
 
         # Same team assigned game and practice on same day and time
         if overlap:
+            #print("Part Overlap")
             return False
 
         # Check unwanted set
         if time_slot in unwanted:
             if combined_teams.intersection(unwanted[time_slot]):
+                #print("Part Unwanted")
                 return False
     
         # U15/U16/U17/U19 cant be in same game slots
         keywords = {"U15", "U16", "U17", "U19"}
         keyword_overlap = [team for team in teams["games"] if any(keyword in team for keyword in keywords)]
         if len(keyword_overlap) > 1:
+            #print("Part U15..")
             return False
     
         #CMSA U12 T1S and CMSA U13 T1S must be scheduled for pracice on tues thurs 6-7
@@ -365,76 +395,64 @@ def partConstr(fact, slot):
                 special_practices_in_this_slot= [team for team in teams["practices"] if any(keyword in team for keyword in {"CMSA U12T1S", "CMSA U13T1S"})]     
                 if (day == "TU" or day == "TH") and (time == "18:00"):
                     if len(special_practices_in_this_slot) == 0:
+                        #print("Part Special")
                         return False
                 else:
                     if len(special_practices_in_this_slot) > 0:
+                        #print("Part Special")
                         return False
                     
                 if len(u12_matching) > 1 or len(u13_matching) > 1:
+                    #print("Part Special")
                     return False
+    
+    #print("Part Passed")
     return True
 
 def constr(fact):
     team_dict = {}
-    isEmpty = True
-    assigned = set()
     gamesAssigned = set()
     practiceAssigned = set()
 
     if not fact:
         return False
 
-    if fact == DEFAULTFACT:
-        return False
-
-    partAssigned = False
-
     #check gamesmax and practicemax
     for slot in fact.gameslots + fact.practiceslots:
         time_slot = f"{slot.day} {slot.startTime}"
         if (isinstance(slot, GameSlot)):
             if (slot.getSize() > slot.max):
-                #print(f"OVER GAME MAX: {slot.day} {slot.startTime}")
+                #print("Full Game max")
                 return False
             if time_slot not in team_dict:
                 team_dict[time_slot] = {"games": set(), "practices": set()}
             team_dict[time_slot]["games"].update(slot.games)
             for game in slot.games:
-                if game not in assigned:
-                    assigned.add(game)
                 if game not in gamesAssigned:
                     gamesAssigned.add(game)
-                if game in PARTIAL_ASSIGNMENTS:
-                    partAssigned = True
+                else:
+                    #print("Full Unique")
+                    return False
         elif (isinstance(slot, PracticeSlot)):
             if (slot.getSize() > slot.max):
-                #print(f"OVER PRACTICE MAX: {slot.day} {slot.startTime}")
+                #print("Full Practice Max")
                 return False
             if time_slot not in team_dict:
                 team_dict[time_slot] = {"games": set(), "practices": set()}
             team_dict[time_slot]["practices"].update(slot.practices)
             for practice in slot.practices:
-                if practice not in assigned:
-                    assigned.add(practice)
                 if practice not in practiceAssigned:
                     practiceAssigned.add(practice)
-        if(slot.getSize() > 0):
-            isEmpty = False
-    
-    # Check if every game assigned
-    # if len(assigned) != (len(games) + len(practices)):
-    #     return False
-    
-    # if len(gamesAssigned) != len(games) + 1:
-    #     return False
+                else:
+                    #print("Full Unique")
+                    return False
 
-    # if len(practiceAssigned) != len(practices):
-    #     return False
-
-    # if not partAssigned:
-    #     return False
-
-    if(isEmpty):
+    missingGames = set(games) - gamesAssigned
+    missingPractice  = set(practices) - practiceAssigned
+    if missingGames or missingPractice:
+        # print("Full Not all games or practices assigned")
+        # print("Missing Games", missingGames)
+        # print("Missing Practices", missingPractice)
         return False
     
     #Special practice and special games for last hard constraint for city of calgary
@@ -452,33 +470,39 @@ def constr(fact):
         day, time = time_slot.split(" ")
 
         # DIV 9 are all evening
-        if time <= "18:00":
-            if  [name for name in combined_teams if 'DIV 9' in name]:
+        if  [name for name in combined_teams if re.search(r'\bDIV 9\d+\b', name)]:
+            if time > "18:00":
+                #print("Full evening")
                 return False
 
         # No games Tuesday 11-12:30
         if day == "TU" and "11:00" <= time <= "12:30":
             if teams["games"]:
+                #print("Full game Tues")
                 return False
 
         # Check not compatible set
         for sets in not_compatible:
-            if all(team in teams["games"] for team in sets) or all(team in teams["practices"] for team in sets): 
+            if all(team in teams["games"] for team in sets) or all(team in teams["practices"] for team in sets):
+                #print("Full not comp") 
                 return False
 
         # Same team assigned game and practice on same day and time
         if overlap:
+            #print("Full overlap")
             return False
 
         # Check unwanted set
         if time_slot in unwanted:
             if combined_teams.intersection(unwanted[time_slot]):
+                #print("Full unwanted")
                 return False
     
         # U15/U16/U17/U19 cant be in same game slots
         keywords = {"U15", "U16", "U17", "U19"}
         keyword_overlap = [team for team in teams["games"] if any(keyword in team for keyword in keywords)]
         if len(keyword_overlap) > 1:
+            #print("Full U15...")
             return False
     
         #CMSA U12 T1S and CMSA U13 T1S must be scheduled for pracice on tues thurs 6-7
@@ -489,78 +513,54 @@ def constr(fact):
                 special_practices_in_this_slot= [team for team in teams["practices"] if any(keyword in team for keyword in {"CMSA U12T1S", "CMSA U13T1S"})]     
                 if (day == "TU" or day == "TH") and (time == "18:00"):
                     if len(special_practices_in_this_slot) == 0:
+                        #print("Full Special")
                         return False
                 else:
                     if len(special_practices_in_this_slot) > 0:
+                        #print("Full Special")
                         return False
                     
                 if len(u12_matching) > 1 or len(u13_matching) > 1:
+                    #print("Full Special")
                     return False
+    #print("Full Passed")
     return True
 
 def SetbasedAI():
     FACTS = []
     if not verifyInput():
-        return print("Input BAD")
+        return
     if not addPartialAssign():
         return
-    numGen = 1
+    numGen = 10
     generated = 0
     firstSchedule = OrTree(DEFAULTFACT, games, practices)
     firstSchedule.eval = Eval(firstSchedule, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
     FACTS.append(firstSchedule)
-    # mutFact = Mutation(FACTS[0], games, practices, PARTIAL_ASSIGNMENTS)
-    # fixedMutFact = OrTree(mutFact, games, practices)
-    # fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+    mutFact = Mutation(FACTS[0], games, practices, PARTIAL_ASSIGNMENTS)
+    fixedMutFact = OrTree(mutFact, games, practices)
+    fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
     keeps = 5
-    # FACTS.append(fixedMutFact)
-    # while generated < numGen:
-    #     mutOrCross = 0
-    #     if mutOrCross == 0:
-    #         mutFact = Mutation(FACTS[0], games, practices, PARTIAL_ASSIGNMENTS)
-    #         fixedMutFact = OrTree(mutFact, games, practices)
-    #         fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-    #         print(fixedMutFact.eval)
-    #         if fixedMutFact.eval < 0:
-    #             print(facts[0].eval)
-    #             for slot in fixedMutFact.gameslots + fixedMutFact.practiceslots:
-    #                 if(isinstance(slot, GameSlot)):
-    #                     print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-    #                     print(slot.games)
-    #                 else:
-    #                     print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-    #                     print(slot.practices)
-    #             return
-    #         FACTS.append(fixedMutFact)
-    #         generated += 1
-    #     else:
-    #         crossFact1, crossFact2 = Cross(FACTS[0], FACTS[1], PARTIAL_ASSIGNMENTS)
-    #         fixedCrossFact1 = OrTree(crossFact1, games, practices)
-    #         fixedCrossFact2 = OrTree(crossFact2, games, practices)
-    #         fixedCrossFact1.eval = Eval(fixedCrossFact1, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-    #         fixedCrossFact2.eval = Eval(fixedCrossFact2, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-    #         print(fixedCrossFact2.eval, fixedCrossFact1.eval)
-    #         if fixedCrossFact2.eval < 0:
-    #             for slot in fixedCrossFact2.gameslots + fixedCrossFact2.practiceslots:
-    #                 if(isinstance(slot, GameSlot)):
-    #                     print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-    #                     print(slot.games)
-    #                 else:
-    #                     print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-    #                     print(slot.practices)
-    #             return
-    #         if fixedCrossFact1.eval < 0:
-    #             for slot in fixedCrossFact1.gameslots + fixedCrossFact1.practiceslots:
-    #                 if(isinstance(slot, GameSlot)):
-    #                     print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-    #                     print(slot.games)
-    #                 else:
-    #                     print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-    #                     print(slot.practices)
-    #             return
-    #         FACTS.append(fixedCrossFact1)
-    #         FACTS.append(fixedCrossFact2)
-    #         generated += 2
+    FACTS.append(fixedMutFact)
+    while generated < numGen:
+        mutOrCross = 0
+        if mutOrCross == 0:
+            mutFact = Mutation(FACTS[0], games)
+            fixedMutFact = OrTree(mutFact, games, practices)
+            fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+            print(fixedMutFact.eval)
+            FACTS.append(fixedMutFact)
+            generated += 1
+        else:
+            crossFact1, crossFact2 = Cross(FACTS[0], FACTS[1])
+            fixedCrossFact1 = OrTree(crossFact1, games, practices)
+            fixedCrossFact2 = OrTree(crossFact2, games, practices)
+            fixedCrossFact1.eval = Eval(fixedCrossFact1, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+            fixedCrossFact2.eval = Eval(fixedCrossFact2, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+            print(fixedCrossFact2.eval, fixedCrossFact1.eval)
+            FACTS.append(fixedCrossFact1)
+            FACTS.append(fixedCrossFact2)
+            generated += 2
         
     FACTS.sort(key=lambda x: x.eval)
 
