@@ -543,6 +543,7 @@ def SetbasedAI():
     keeps = 5
     FACTS.append(fixedMutFact)
     while generated < numGen:
+        print(f"Generations: {generated}/{numGen}")
         mutOrCross = random.randint(0, 1)
         if mutOrCross == 0:
             mutFact = Mutation(FACTS[0])
