@@ -529,9 +529,9 @@ def constr(fact):
 def SetbasedAI():
     FACTS = []
     keeps = 5
-    numGen = 20
+    numGen = 10
     generation = 0
-    initialScheduleCount = 10
+    initialScheduleCount = 20
 
     if not verifyInput():
         return
