@@ -1,6 +1,5 @@
 from Slots import GameSlot, PracticeSlot
 from Schedule import Schedule
-import random
 
 def Delete(fact, keeps):
     if not fact:

@@ -1,7 +1,6 @@
 from Slots import GameSlot, PracticeSlot
 from Schedule import Schedule
 import random
-import math
 
 def Cross(scheduleA,scheduleB):
     day_order = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4}

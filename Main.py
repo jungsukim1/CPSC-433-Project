@@ -570,12 +570,11 @@ def SetbasedAI():
     
     return FACTS
 
-facts = SetbasedAI() if SetbasedAI() else None
-
+facts = SetbasedAI()
 if facts:
     print(facts[0].eval)
     for slot in facts[0].gameslots + facts[0].practiceslots:
-        if(isinstance(slot, GameSlot)):
+        if isinstance(slot, GameSlot):
             print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
             print(slot.games)
         else:
