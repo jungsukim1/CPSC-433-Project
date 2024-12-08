@@ -529,7 +529,7 @@ def constr(fact):
 def SetbasedAI():
     FACTS = []
     keeps = 5
-    numGen = 10
+    numGen = 20
     generation = 0
     initialScheduleCount = 10
 
