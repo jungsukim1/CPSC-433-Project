@@ -532,7 +532,7 @@ def SetbasedAI():
         return
     if not addPartialAssign():
         return
-    numGen = 100
+    numGen = 1
     generated = 0
     firstSchedule = OrTree(DEFAULTFACT, games, practices)
     firstSchedule.eval = Eval(firstSchedule, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
@@ -572,11 +572,35 @@ def SetbasedAI():
 
 facts = SetbasedAI()
 if facts:
-    print(facts[0].eval)
-    for slot in facts[0].gameslots + facts[0].practiceslots:
-        if isinstance(slot, GameSlot):
-            print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-            print(slot.games)
-        else:
-            print(f"{slot.day} {slot.startTime} -> Max: {slot.max}, Min: {slot.min}")
-            print(slot.practices)
+    print(f"Eval Value: {facts[0].eval}")
+    
+    # Combine and sort games and practices directly
+    sorted_names = []
+    
+    # Collect games and practices together
+    for game_slot in facts[0].gameslots:
+        sorted_names.extend(game_slot.games)
+    for practice_slot in facts[0].practiceslots:
+        sorted_names.extend(practice_slot.practices)
+
+    # Sort the combined names alphabetically
+    sorted_names.sort()
+
+    # Use dictionaries to store the day and startTime info for faster lookup
+    slot_info = {}
+
+    # Populate the dictionary with game slot information
+    for game_slot in facts[0].gameslots:
+        for game in game_slot.games:
+            slot_info[game] = (game_slot.day, game_slot.startTime)
+
+    # Populate the dictionary with practice slot information
+    for practice_slot in facts[0].practiceslots:
+        for practice in practice_slot.practices:
+            slot_info[practice] = (practice_slot.day, practice_slot.startTime)
+
+    # Print the results
+    for name in sorted_names:
+        if name in slot_info:
+            day, start_time = slot_info[name]
+            print(f"{name} : {day}, {start_time}")
