@@ -532,7 +532,7 @@ def SetbasedAI():
         return
     if not addPartialAssign():
         return
-    numGen = 1000
+    numGen = 100
     generated = 0
     firstSchedule = OrTree(DEFAULTFACT, games, practices)
     firstSchedule.eval = Eval(firstSchedule, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
