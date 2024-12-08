@@ -528,46 +528,55 @@ def constr(fact):
 
 def SetbasedAI():
     FACTS = []
+    keeps = 5
+    numGen = 10
+    generation = 0
+    initialScheduleCount = 10
+
     if not verifyInput():
         return
     if not addPartialAssign():
         return
-    numGen = 100
-    generated = 0
-    firstSchedule = OrTree(DEFAULTFACT, games, practices)
-    firstSchedule.eval = Eval(firstSchedule, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-    FACTS.append(firstSchedule)
-    mutFact = Mutation(FACTS[0])
-    fixedMutFact = OrTree(mutFact, games, practices)
-    fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-    keeps = 5
-    FACTS.append(fixedMutFact)
-    while generated < numGen:
-        print(f"Generations: {generated}/{numGen}")
-        mutOrCross = random.randint(0, 1)
-        if mutOrCross == 0:
-            mutFact = Mutation(FACTS[0])
-            fixedMutFact = OrTree(mutFact, games, practices)
-            fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-            print(fixedMutFact.eval)
-            FACTS.append(fixedMutFact)
-            generated += 1
-        else:
-            crossFact1, crossFact2 = Cross(FACTS[0], FACTS[1])
-            fixedCrossFact1 = OrTree(crossFact1, games, practices)
-            fixedCrossFact2 = OrTree(crossFact2, games, practices)
-            fixedCrossFact1.eval = Eval(fixedCrossFact1, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-            fixedCrossFact2.eval = Eval(fixedCrossFact2, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-            print(fixedCrossFact2.eval, fixedCrossFact1.eval)
-            FACTS.append(fixedCrossFact1)
-            FACTS.append(fixedCrossFact2)
-            generated += 2
-        
-    FACTS.sort(key=lambda x: x.eval)
-
-    if len(FACTS) > keeps:
-        Delete(FACTS, keeps)
     
+    #rng creating schedules and keeping the 5 best
+    for i in range(initialScheduleCount):
+        test = OrTree(DEFAULTFACT, games, practices)
+        test.eval = Eval(test, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+        FACTS.append(test)
+        print(test.eval)
+    FACTS.sort(key=lambda x: x.eval)
+    Delete(FACTS, keeps)
+
+    while generation < numGen:
+        print(f"Generations: {generation}/{numGen}")
+        #go through each schedule that was kept and mutate or cross all of them
+        #only keep the 5 best for the next generation
+        for i in range(len(FACTS)):
+            mutOrCross = random.randint(0, 1)
+            if mutOrCross == 0:
+                mutFact = Mutation(FACTS[i])
+                fixedMutFact = OrTree(mutFact, games, practices)
+                fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+                print(fixedMutFact.eval)
+                FACTS.append(fixedMutFact)
+            else:
+                #cross the current schedule with the best schedule
+                if i == 0:
+                    crossFact1, crossFact2 = Cross(FACTS[0], random.choice(FACTS))
+                else:
+                    crossFact1, crossFact2 = Cross(FACTS[i], FACTS[0])
+
+                fixedCrossFact1 = OrTree(crossFact1, games, practices)
+                fixedCrossFact2 = OrTree(crossFact2, games, practices)
+                fixedCrossFact1.eval = Eval(fixedCrossFact1, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+                fixedCrossFact2.eval = Eval(fixedCrossFact2, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+                print(fixedCrossFact2.eval, fixedCrossFact1.eval)
+                FACTS.append(fixedCrossFact1)
+                FACTS.append(fixedCrossFact2)
+        FACTS.sort(key=lambda x: x.eval)
+        if len(FACTS) > keeps:
+            Delete(FACTS, keeps)
+        generation += 1
     return FACTS
 
 facts = SetbasedAI()
