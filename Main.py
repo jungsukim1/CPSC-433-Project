@@ -199,7 +199,7 @@ def OrTree(fact, games, practices):
                 if slot not in newFact.gameslots:
                     newFact.addGameSlot(slot)
             else:  # If it's a practice slot
-                tempFact.removeSpecficPracticeSlot(slot)
+                tempFact.removeSpecificPracticeSlot(slot)
                 # Add the practice slot to the new schedule if not already added
                 if slot not in newFact.practiceslots:
                     newFact.addPracticeSlot(slot)
