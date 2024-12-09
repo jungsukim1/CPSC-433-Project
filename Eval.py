@@ -1,6 +1,7 @@
 from Slots import GameSlot, PracticeSlot
 from collections import Counter
 
+# Determines the eval value of schedules whether they meet the min slot value or not
 def eval_minfilled(fact, pengamemin, penpracticemin):
     # Evaluate the penalty for game and practice slots that do not meet their minimum size
     game_pen = 0
@@ -8,14 +9,15 @@ def eval_minfilled(fact, pengamemin, penpracticemin):
     
     # Loop through all game and practice slots
     for slot in fact.gameslots + fact.practiceslots:
-        if isinstance(slot, GameSlot):  # Check if it's a GameSlot
-            if slot.getSize() < slot.getMin():  # Check if the size is less than the minimum
-                game_pen += pengamemin  # Add penalty for insufficient games
-        else:  # It's a PracticeSlot
-            if slot.getSize() < slot.getMin():  # Check if the size is less than the minimum
-                practice_pen += penpracticemin  # Add penalty for insufficient practices
-    return (game_pen + practice_pen)  # Return the total penalty
+        if isinstance(slot, GameSlot):
+            if slot.getSize() < slot.getMin():
+                game_pen += pengamemin
+        else:
+            if slot.getSize() < slot.getMin():
+                practice_pen += penpracticemin
+    return (game_pen + practice_pen)
 
+# Determine the eval value of schedule whether they satisfy the preference slot or not
 def eval_pref(fact, preferences):
     # Evaluate the penalty based on the preferences for the scheduled times
     pref_val = 0
@@ -35,6 +37,7 @@ def eval_pref(fact, preferences):
                         pref_val += pref[1]  # Add the penalty value from the preference
     return pref_val  # Return the total preference penalty
 
+# Determine the eval value of schedule whether their pairing is satisfied or not
 def eval_pair(fact, pair, pennotpaired):
     # Evaluate the penalty for pairs that are scheduled in different time slots
     slot_pair = pair
@@ -61,6 +64,8 @@ def eval_pair(fact, pair, pennotpaired):
                 val += pennotpaired  # Add penalty for non-paired teams
     return val / 2  # Return the penalty value, divided by 2 to account for double counting
 
+
+# Determine the eval value of schdule whether their divs are seperated or not
 def eval_secdiff(fact, pensection):
     # Evaluate the penalty for teams in the same section scheduled too closely together
     team_dict = {}
@@ -86,6 +91,8 @@ def eval_secdiff(fact, pensection):
                         val += pensection  # Add penalty for consecutive scheduling of teams in the same section
     return val  # Return the total penalty for section differences
 
+
+# Determines the eval value of the schedule
 def Eval(fact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection):
     # Calculate the total evaluation score based on all the factors
     val = ((eval_minfilled(fact, pengamemin, penpracticemin) * wminfilled) + 
