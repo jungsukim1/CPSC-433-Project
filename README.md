@@ -3,7 +3,6 @@
 ## Command to run the program:
 python Main.py "file name" wminfilled wpref wpair wsecdiff pengamemin penpracticemin pennotpaired pensection
 
-Example: python Main.py input.txt 1 0 1 0 10 10 10
+Example: python Main.py CPSC433F24-LargeInput2.txt 1 1 1 1 1 1 1 1
 
-
-The Weights is any positive value and the Penalty is any positive integer value
+The Weights and the Penalties is any positive integer value
