@@ -517,11 +517,11 @@ def constr(fact):
     return True
 
 def SetbasedAI():
-    FACTS = []  # List to store schedules (facts)
-    keeps = 5  # Number of best schedules to keep each generation
-    numGen = 10  # Number of generations
-    generation = 0  # Initialize generation count
-    initialScheduleCount = 10  # Number of initial schedules to generate
+    FACTS = []
+    keeps = 5
+    numGen = 10
+    generation = 0
+    initialScheduleCount = 20
 
     if not verifyInput():  # Verify the input
         return
