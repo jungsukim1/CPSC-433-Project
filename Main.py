@@ -529,9 +529,10 @@ def constr(fact):
 def SetbasedAI():
     FACTS = []
     keeps = 5
-    numGen = 10
+    numGen = 100
     generation = 0
-    initialScheduleCount = 20
+    initialScheduleCount = 100
+    scoreToBeat = 9293.0
 
     if not verifyInput():
         return
@@ -547,36 +548,45 @@ def SetbasedAI():
     FACTS.sort(key=lambda x: x.eval)
     Delete(FACTS, keeps)
 
-    while generation < numGen:
-        print(f"Generations: {generation}/{numGen}")
-        #go through each schedule that was kept and mutate or cross all of them
-        #only keep the 5 best for the next generation
-        for i in range(len(FACTS)):
-            mutOrCross = random.randint(0, 1)
-            if mutOrCross == 0:
-                mutFact = Mutation(FACTS[i])
-                fixedMutFact = OrTree(mutFact, games, practices)
-                fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-                print(fixedMutFact.eval)
-                FACTS.append(fixedMutFact)
-            else:
-                #cross the current schedule with the best schedule
-                if i == 0:
-                    crossFact1, crossFact2 = Cross(FACTS[0], random.choice(FACTS))
-                else:
-                    crossFact1, crossFact2 = Cross(FACTS[i], FACTS[0])
-
-                fixedCrossFact1 = OrTree(crossFact1, games, practices)
-                fixedCrossFact2 = OrTree(crossFact2, games, practices)
-                fixedCrossFact1.eval = Eval(fixedCrossFact1, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-                fixedCrossFact2.eval = Eval(fixedCrossFact2, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
-                print(fixedCrossFact2.eval, fixedCrossFact1.eval)
-                FACTS.append(fixedCrossFact1)
-                FACTS.append(fixedCrossFact2)
+    while FACTS[0].eval > scoreToBeat:
+        #rng creating schedules and keeping the 5 best
+        for i in range(initialScheduleCount):
+            test = OrTree(DEFAULTFACT, games, practices)
+            test.eval = Eval(test, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+            FACTS.append(test)
+            print(test.eval)
         FACTS.sort(key=lambda x: x.eval)
-        if len(FACTS) > keeps:
-            Delete(FACTS, keeps)
-        generation += 1
+        Delete(FACTS, keeps)
+        
+        while generation < numGen:
+            print(f"Best Eval Comparison: {FACTS[0].eval}/{scoreToBeat}")
+            #go through each schedule that was kept and mutate or cross all of them
+            #only keep the 5 best for the next generation
+            for i in range(len(FACTS)):
+                mutOrCross = random.randint(0, 1)
+                if mutOrCross == 0:
+                    mutFact = Mutation(FACTS[i])
+                    fixedMutFact = OrTree(mutFact, games, practices)
+                    fixedMutFact.eval = Eval(fixedMutFact, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+                    FACTS.append(fixedMutFact)
+                else:
+                    #cross the current schedule with the best schedule
+                    if i == 0:
+                        crossFact1, crossFact2 = Cross(FACTS[0], random.choice(FACTS))
+                    else:
+                        crossFact1, crossFact2 = Cross(FACTS[i], FACTS[0])
+
+                    fixedCrossFact1 = OrTree(crossFact1, games, practices)
+                    fixedCrossFact2 = OrTree(crossFact2, games, practices)
+                    fixedCrossFact1.eval = Eval(fixedCrossFact1, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+                    fixedCrossFact2.eval = Eval(fixedCrossFact2, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)
+                    FACTS.append(fixedCrossFact1)
+                    FACTS.append(fixedCrossFact2)
+            FACTS.sort(key=lambda x: x.eval)
+            if len(FACTS) > keeps:
+                Delete(FACTS, keeps)
+            generation += 1
+        generation = 0
     return FACTS
 
 facts = SetbasedAI()
