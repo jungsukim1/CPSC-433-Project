@@ -528,18 +528,19 @@ def SetbasedAI():
     if not addPartialAssign():  # Add partial assignments
         return
     
+    print(f"Creating {initialScheduleCount} initial schedules(Eval values shown)")
     # Generate initial schedules and evaluate them
     for i in range(initialScheduleCount):
-        test = OrTree(DEFAULTFACT, games, practices)  # Create new schedule
-        test.eval = Eval(test, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)  # Evaluate schedule
-        FACTS.append(test)
-        print(test.eval)  # Print evaluation score of the schedule
+        tempInit = OrTree(DEFAULTFACT, games, practices)  # Create new schedule
+        tempInit.eval = Eval(tempInit, wminfilled, wpref, wpair, wsecdiff, pengamemin, penpracticemin, preferences, pair, pennotpaired, pensection)  # Evaluate schedule
+        FACTS.append(tempInit)
+        print(tempInit.eval)  # Print evaluation score of the schedule
     FACTS.sort(key=lambda x: x.eval)  # Sort schedules based on evaluation
     Delete(FACTS, keeps)  # Keep only the top 'keeps' schedules
 
     # Start the genetic algorithm for the specified number of generations
     while generation < numGen:
-        print(f"Generations: {generation}/{numGen}")  # Print current generation
+        print(f"Generation: {generation}/{numGen}")  # Print current generation
         # Iterate through each schedule and apply mutation or crossover
         for i in range(len(FACTS)):
             mutOrCross = random.randint(0, 1)  # Randomly decide between mutation and crossover
